@@ -52,7 +52,7 @@ app.use('/api', userActivity)
 app.use('/api', calenderEvent)
 app.use('/api', message)
 
-const PORT = 8000
+const PORT = process.env.PORT||8000
 
 app.listen(PORT, () => {
     logger(`Listening on port ${PORT}`, 'SERVER')
