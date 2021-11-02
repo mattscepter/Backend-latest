@@ -57,7 +57,7 @@ app.use('/api', message)
 app.use('/api', classes)
 app.use('/api', bucket)
 
-const PORT = 8000
+const PORT = process.env.PORT||8000
 
 app.listen(PORT, () => {
     logger(`Listening on port ${PORT}`, 'SERVER')
