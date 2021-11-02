@@ -301,7 +301,6 @@ const getAllUserDocs = async (req, res) => {
                 console.log(data)
                 data?.docs?.forEach((val, index) => {
                     _.forIn(val, (value, key) => {
-                        data.docs[index][key]
                         if (
                             data.docs[`${index}`][`${key}`] !== '_id' &&
                             'userId' &&
@@ -309,8 +308,20 @@ const getAllUserDocs = async (req, res) => {
                             'updatedAt' &&
                             '__v'
                         ) {
-                            data.docs[`${index}`][`${key}`]?.data
+                            data.docs[`${index}`][`${key}`]?.data ||
+                            data.docs[`${index}`][`${key}`]?.data === null
                                 ? (data.docs[`${index}`][`${key}`].data =
+                                      undefined)
+                                : null
+
+                            data.docs[`${index}`][`${key}`]?.name === null
+                                ? (data.docs[`${index}`][`${key}`].name =
+                                      undefined)
+                                : null
+
+                            data.docs[`${index}`][`${key}`]?.contentType ===
+                            null
+                                ? (data.docs[`${index}`][`${key}`].contentType =
                                       undefined)
                                 : null
                         }

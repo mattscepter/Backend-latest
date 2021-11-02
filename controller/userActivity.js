@@ -12,11 +12,11 @@ const createActivity = async (req, res) => {
     let result = {
         userId: '',
         userName: '',
-        activityDetails: ''
+        activityDetails: '',
+        createdBy: ''
     }
-    const userId = req.params.userId
-    const activityDetails = req.body.activityDetails
-
+    let userId = req.params.userId
+    const { activityDetails, admin } = req.body
     try {
         await userModel.findOne({ _id: userId }).exec((err, data) => {
             if (err) {
@@ -26,14 +26,17 @@ const createActivity = async (req, res) => {
                 result.userId = userId
                 result.userName = data.name
                 result.activityDetails = activityDetails
+                admin !== undefined && admin
+                    ? (result.createdBy = admin)
+                    : (result.createdBy = 'self')
 
                 const activityModel = new userActivityModel(result)
                 activityModel.save((err, data) => {
                     if (err) {
-                        res.status(SC.BAD_REQUEST).json({
+                        logger(err, 'ERROR')
+                        return res.status(SC.BAD_REQUEST).json({
                             error: 'Creating Activity in DB is failed!'
                         })
-                        logger(err, 'ERROR')
                     }
                     res.status(SC.OK).json({
                         message: 'User Activity created successfully!',
@@ -148,6 +151,7 @@ const getAllUserActivities = async (req, res) => {
                                 $push: {
                                     activityId: '$_id',
                                     activityDetails: '$activityDetails',
+                                    createdBy: '$createdBy',
                                     createdAt: {
                                         $dateToString: {
                                             date: '$createdAt',

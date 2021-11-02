@@ -22,7 +22,6 @@ router.post(
     '/user-activity/create/:userId',
     isSignedIn,
     isValidToken,
-    isAdmin,
     createActivity
 )
 router.get('/user-activity/get', isSignedIn, isValidToken, getUserAvtivity)

@@ -37,11 +37,32 @@ const isEmployee = (req, res, next) => {
                     error: 'No user was found in DB!'
                 })
             }
-            if (user.role === 2) {
+            if (user.role === 3) {
                 next()
             } else {
                 return res.status(SC.UNAUTHORIZED).json({
                     error: 'Not an Employee!'
+                })
+            }
+        })
+    }
+}
+
+const isInstructor = (req, res, next) => {
+    const authId = req.auth._id
+
+    if (authId) {
+        userModel.findById(authId).exec((err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'No user was found in DB!'
+                })
+            }
+            if (user.role === 4) {
+                next()
+            } else {
+                return res.status(SC.UNAUTHORIZED).json({
+                    error: 'Not a Instructor!'
                 })
             }
         })
@@ -58,7 +79,7 @@ const isAdmin = (req, res, next) => {
                     error: 'No user was found in DB!'
                 })
             }
-            if (user.role === 2 || user.role === 3) {
+            if (user.role === 2 || user.role === 3 || user.role === 4) {
                 next()
             } else {
                 return res.status(SC.UNAUTHORIZED).json({
@@ -69,10 +90,33 @@ const isAdmin = (req, res, next) => {
     }
 }
 
+const isAdminOrInstructor = (req, res, next) => {
+    const authId = req.auth._id
+
+    if (authId) {
+        userModel.findById(authId).exec((err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'No user was found in DB!'
+                })
+            }
+            if (user.role === 2 || user.role === 3) {
+                next()
+            } else {
+                return res.status(SC.UNAUTHORIZED).json({
+                    error: 'Not an admin or an Instructor!'
+                })
+            }
+        })
+    }
+}
+
 module.exports = {
     isSignedIn,
     isValidToken,
     isAuthenticated,
+    isEmployee,
+    isInstructor,
     isAdmin,
-    isEmployee
+    isAdminOrInstructor
 }

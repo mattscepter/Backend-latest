@@ -6,10 +6,22 @@ const mongoose = require('mongoose')
 
 const contactSchema = new mongoose.Schema(
     {
-        phoneNumber: String,
-        address: String,
-        email: String,
-        mapLocation: String
+        phoneNumber: {
+            type: String,
+            trim: true
+        },
+        address: {
+            type: String,
+            trim: true
+        },
+        email: {
+            type: String,
+            trim: true
+        },
+        mapLocation: {
+            type: String,
+            trim: true
+        }
     },
     { timestamps: true }
 )
