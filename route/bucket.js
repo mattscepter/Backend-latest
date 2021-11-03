@@ -19,7 +19,7 @@ const {
 } = require('../controller/middleware')
 
 router.post(
-    '/bucket/create',
+    '/bucket/create/:userId',
     isSignedIn,
     isValidToken,
     isAdminOrInstructor,

@@ -56,6 +56,66 @@ const getAllUsers = async (req, res) => {
     }
 }
 
+const getAllStudents = async (req, res) => {
+    try {
+        await userModel.find({ role: 1 }).exec((err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'No users were found in a DB!'
+                })
+            }
+            res.status(SC.OK).json({
+                message: 'User Fetched Successfully!',
+                data: user
+            })
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Get All Users Function is Executed')
+    }
+}
+
+const getAllEmployees = async (req, res) => {
+    try {
+        await userModel.find({ role: 3 }).exec((err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'No users were found in a DB!'
+                })
+            }
+            res.status(SC.OK).json({
+                message: 'User Fetched Successfully!',
+                data: user
+            })
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Get All Users Function is Executed')
+    }
+}
+
+const getAllInsturctors = async (req, res) => {
+    try {
+        await userModel.find({ role: 4 }).exec((err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'No users were found in a DB!'
+                })
+            }
+            res.status(SC.OK).json({
+                message: 'User Fetched Successfully!',
+                data: user
+            })
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Get All Users Function is Executed')
+    }
+}
+
 const getUserByQuery = async (req, res) => {
     try {
         await userModel.find(req.body.query).exec((err, user) => {
@@ -81,5 +141,8 @@ module.exports = {
     getUserById,
     getUser,
     getAllUsers,
+    getAllStudents,
+    getAllEmployees,
+    getAllInsturctors,
     getUserByQuery
 }

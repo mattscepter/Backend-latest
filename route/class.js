@@ -21,7 +21,7 @@ const {
 } = require('../controller/middleware')
 
 router.post(
-    '/class/create',
+    '/class/create/:instructorId',
     isSignedIn,
     isValidToken,
     isAdminOrInstructor,

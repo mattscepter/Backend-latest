@@ -19,7 +19,7 @@ const createClass = async (req, res) => {
         students: []
     }
 
-    const instructorId = req.auth._id
+    const instructorId = req.params.instructorId
     const { classname, date, time, location, noOfSpots, students } = req.body
     try {
         await userModel.findOne({ _id: instructorId }).exec((err, data) => {
@@ -197,6 +197,7 @@ const getAllClasses = async (req, res) => {
                 logger(err, 'ERROR')
             }
             if (data) {
+                data.forEach((val) => (val.students = undefined))
                 res.status(SC.OK).json({
                     message: 'Classes fetched successfully!',
                     data: data
