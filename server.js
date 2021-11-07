@@ -7,6 +7,7 @@ const dotenv = require('dotenv')
 const cors = require('cors')
 const helmet = require('helmet')
 const mongo = require('./config/mongo')
+const ID = require('nodejs-unique-numeric-id-generator')
 
 dotenv.config()
 const app = express()
@@ -17,6 +18,8 @@ const { loggerUtil: logger } = require('./utils/logger')
 //mongo connection func call
 mongo()
 
+console.log(ID.generate(new Date().toJSON()))
+
 //routes
 const auth = require('./route/auth')
 const user = require('./route/user')
@@ -25,6 +28,7 @@ const testimonial = require('./route/testimonial')
 const contact = require('./route/contact')
 const subscription = require('./route/subscription')
 const docs = require('./route/docs')
+const docs2 = require('./route/doc2')
 const contactUser = require('./route/contactUser')
 const client = require('./route/client')
 const team = require('./route/team')
@@ -33,6 +37,7 @@ const calenderEvent = require('./route/calenderEvent')
 const message = require('./route/message')
 const classes = require('./route/class')
 const bucket = require('./route/bucket')
+const courseMaterial = require('./route/courseMaterial')
 
 //built-in middlewares
 app.use(express.static('public'))
@@ -48,6 +53,7 @@ app.use('/api', testimonial)
 app.use('/api', contact)
 app.use('/api', subscription)
 app.use('/api', docs)
+app.use('/api', docs2)
 app.use('/api', contactUser)
 app.use('/api', client)
 app.use('/api', team)
@@ -56,8 +62,9 @@ app.use('/api', calenderEvent)
 app.use('/api', message)
 app.use('/api', classes)
 app.use('/api', bucket)
+app.use('/api', courseMaterial)
 
-const PORT = process.env.PORT||8000
+const PORT = process.env.PORT || 8000
 
 app.listen(PORT, () => {
     logger(`Listening on port ${PORT}`, 'SERVER')

@@ -57,6 +57,12 @@ const userSchema = new mongoose.Schema(
             default: null
         },
 
+        //Course bought
+        courses: {
+            type: Array,
+            default: []
+        },
+
         //contact Info
         email: {
             type: String,

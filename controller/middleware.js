@@ -111,6 +111,29 @@ const isAdminOrInstructor = (req, res, next) => {
     }
 }
 
+const hasCourseorAdmin = (req, res, next) => {
+    const authId = req.auth._id
+    const courseId = req.params.courseId
+    if (authId) {
+        userModel.findById(authId).exec((err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'No user was found in DB!'
+                })
+            }
+            if (user.role === 2) {
+                next()
+            } else if (user.courses.includes(courseId)) {
+                next()
+            } else {
+                return res.status(SC.UNAUTHORIZED).json({
+                    error: 'Course not bought'
+                })
+            }
+        })
+    }
+}
+
 module.exports = {
     isSignedIn,
     isValidToken,
@@ -118,5 +141,6 @@ module.exports = {
     isEmployee,
     isInstructor,
     isAdmin,
-    isAdminOrInstructor
+    isAdminOrInstructor,
+    hasCourseorAdmin
 }
