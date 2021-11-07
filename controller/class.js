@@ -13,14 +13,12 @@ const createClass = async (req, res) => {
         instructorName: '',
         classname: '',
         date: '',
-        time: '',
         location: '',
         noOfSpots: 0,
         students: []
     }
-
     const instructorId = req.params.instructorId
-    const { classname, date, time, location, noOfSpots, students } = req.body
+    const { classname, date, location, noOfSpots, students } = req.body
     try {
         await userModel.findOne({ _id: instructorId }).exec((err, data) => {
             if (err) {
@@ -30,8 +28,7 @@ const createClass = async (req, res) => {
                 result.instructorId = instructorId
                 result.instructorName = data.name
                 result.classname = classname
-                result.date = date ? new Date(date).toDateString() : null
-                result.time = time
+                result.date = date ? date : null
                 result.location = location ? location : null
                 result.noOfSpots = noOfSpots ? noOfSpots : 0
                 result.students = students ? students : []
@@ -130,33 +127,44 @@ const removeStudents = async (req, res) => {
 }
 
 const updateClass = async (req, res) => {
-    const { classname, instructor, date, time, location, noOfSpots } = req.body
+    const { classname, instructor, date, location, noOfSpots } = req.body
     try {
-        classModel
-            .updateOne(
-                { _id: req.params.classId },
-                {
-                    $set: {
-                        classname,
-                        instructor,
-                        date,
-                        time,
-                        location,
-                        noOfSpots
-                    }
-                }
-            )
-            .then(() => {
-                res.status(SC.OK).json({
-                    message: 'Class updated successfully!'
-                })
-            })
-            .catch((err) => {
-                res.status(SC.BAD_REQUEST).json({
-                    error: 'Class updation failed!'
-                })
+        await userModel.findOne({ _id: instructor }).exec((err, data) => {
+            if (err) {
                 logger(err, 'ERROR')
-            })
+            }
+            if (data) {
+                classModel
+                    .updateOne(
+                        { _id: req.params.classId },
+                        {
+                            $set: {
+                                classname,
+                                instructorId: instructor,
+                                instructorName: data.name,
+                                date,
+                                location,
+                                noOfSpots
+                            }
+                        }
+                    )
+                    .then(() => {
+                        res.status(SC.OK).json({
+                            message: 'Class updated successfully!'
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(SC.BAD_REQUEST).json({
+                            error: 'Class updation failed!'
+                        })
+                        logger(err, 'ERROR')
+                    })
+            } else {
+                res.status(SC.NOT_FOUND).json({
+                    error: 'No Instructor found!'
+                })
+            }
+        })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
@@ -197,7 +205,6 @@ const getAllClasses = async (req, res) => {
                 logger(err, 'ERROR')
             }
             if (data) {
-                data.forEach((val) => (val.students = undefined))
                 res.status(SC.OK).json({
                     message: 'Classes fetched successfully!',
                     data: data

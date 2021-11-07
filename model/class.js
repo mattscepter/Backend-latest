@@ -20,10 +20,6 @@ const classSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        time: {
-            type: String,
-            required: true
-        },
         location: {
             type: String,
             trim: true,

@@ -7,7 +7,6 @@ const dotenv = require('dotenv')
 const cors = require('cors')
 const helmet = require('helmet')
 const mongo = require('./config/mongo')
-const ID = require('nodejs-unique-numeric-id-generator')
 
 dotenv.config()
 const app = express()
@@ -17,8 +16,6 @@ const { loggerUtil: logger } = require('./utils/logger')
 
 //mongo connection func call
 mongo()
-
-console.log(ID.generate(new Date().toJSON()))
 
 //routes
 const auth = require('./route/auth')
