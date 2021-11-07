@@ -12,10 +12,11 @@ const createMessage = async (req, res) => {
     let result = {
         userId: '',
         userName: '',
+        subject: '',
         message: '',
         recipients: []
     }
-    const { message, recipients } = req.body
+    const { subject, message, recipients } = req.body
     const userId = req.auth._id
     try {
         await userModel.findOne({ _id: userId }).exec((err, data) => {
@@ -28,12 +29,14 @@ const createMessage = async (req, res) => {
                 data.name !== null
                     ? (result.userName = data.name)
                     : (result.userName = 'unknown')
+                result.subject = subject
                 result.message = message
                 result.recipients = recipients
 
                 const messages = new messageModel(result)
                 messages.save((err, data) => {
                     if (err) {
+                        console.log(err)
                         res.status(SC.BAD_REQUEST).json({
                             error: 'Saving data in DB failed!'
                         })

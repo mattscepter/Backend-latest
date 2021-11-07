@@ -13,6 +13,11 @@ const messageSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
+        subject: {
+            type: String,
+            required: true,
+            trim: true
+        },
         message: {
             type: String,
             required: true,
@@ -20,12 +25,7 @@ const messageSchema = new mongoose.Schema(
         },
         recipients: [
             {
-                userId: mongoose.Schema.ObjectId,
-                userName: {
-                    type: String,
-                    required: true,
-                    trim: true
-                }
+                userId: mongoose.Schema.ObjectId
             }
         ]
     },

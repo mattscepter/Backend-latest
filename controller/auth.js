@@ -144,6 +144,29 @@ const signin = async (req, res) => {
     }
 }
 
+const updateRole = async (req, res) => {
+    const { role } = req.body
+    try {
+        await userModel
+            .updateOne({ _id: req.params.userId }, { role })
+            .then(() => {
+                res.status(SC.OK).json({
+                    message: 'User Updated Successfully!'
+                })
+            })
+            .catch((err) => {
+                res.status(SC.INTERNAL_SERVER_ERROR).json({
+                    error: 'User Updation Failed!'
+                })
+                logger(err, 'ERROR')
+            })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger(`User Role Update Function Executed`)
+    }
+}
+
 const signout = (req, res) => {
     res.clearCookie('Token')
 
@@ -324,6 +347,7 @@ module.exports = {
     signup,
     signin,
     update,
+    updateRole,
     signout,
     googleLogin,
     facebookLogin

@@ -128,7 +128,7 @@ const docsSchema = new mongoose.Schema(
                 default: ''
             }
         },
-        medicalEmergency: {
+        CPRTraining: {
             name: {
                 type: String,
                 default: null

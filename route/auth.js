@@ -9,12 +9,17 @@ const {
     signup,
     signin,
     update,
+    updateRole,
     signout,
     googleLogin,
     facebookLogin
 } = require('../controller/auth')
 
-const { isSignedIn, isValidToken } = require('../controller/middleware')
+const {
+    isSignedIn,
+    isValidToken,
+    isAdmin
+} = require('../controller/middleware')
 
 router.post(
     '/signup',
@@ -48,6 +53,13 @@ router.put(
     isSignedIn,
     isValidToken,
     update
+)
+router.put(
+    '/user/updateRole/:userId',
+    isSignedIn,
+    isValidToken,
+    isAdmin,
+    updateRole
 )
 
 router.get('/signout', signout)
