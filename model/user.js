@@ -227,6 +227,10 @@ const userSchema = new mongoose.Schema(
             default: null
         },
 
+        //class cretification
+
+        certificates: {},
+
         //credentials
         encrypted_password: {
             type: String,
