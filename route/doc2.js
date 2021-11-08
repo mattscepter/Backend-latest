@@ -4,7 +4,8 @@ const {
     createDoc,
     reuploadDoc,
     getUsersDocAdmin,
-    approveDoc
+    approveDoc,
+    getDoc
 } = require('../controller/docs2')
 const {
     isSignedIn,
@@ -24,6 +25,8 @@ router.get(
     getUsersDocAdmin
 )
 router.get('/docs2/getAllDocs', isSignedIn, isValidToken, isAdmin, getAllDocs)
+router.get('/docs2/getDoc/:id', isSignedIn, isValidToken, getDoc)
+
 router.put(
     '/docs2/approveDoc/:id',
     isSignedIn,

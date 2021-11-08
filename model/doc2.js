@@ -7,6 +7,10 @@ const mongoose = require('mongoose')
 const docSchema = new mongoose.Schema(
     {
         userId: mongoose.Schema.ObjectId,
+        username: {
+            type: String,
+            default: null
+        },
         name: {
             type: String,
             default: null

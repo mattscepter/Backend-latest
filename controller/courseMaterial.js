@@ -27,7 +27,7 @@ const buyCourse = async (req, res) => {
     } catch (error) {
         logger(error, 'ERROR')
     } finally {
-        logger('Add Course Function is Executed')
+        logger('Buy Course Function is Executed')
     }
 }
 
@@ -152,7 +152,7 @@ const deleteCourse = async (req, res) => {
     } catch (error) {
         logger(error, 'ERROR')
     } finally {
-        logger('Delete Module Function is Executed')
+        logger('Delete Course Function is Executed')
     }
 }
 
@@ -356,7 +356,7 @@ const getChapter = async (req, res) => {
     } catch (error) {
         logger(error, 'ERROR')
     } finally {
-        logger('Fetch Module Function is Executed')
+        logger('Fetch Chapter Function is Executed')
     }
 }
 
@@ -549,7 +549,7 @@ const addQuestion = async (req, res) => {
     } catch (error) {
         logger(error, 'ERROR')
     } finally {
-        logger('Create Slide Function is Executed')
+        logger('Create Question Slide Function is Executed')
     }
 }
 
