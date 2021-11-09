@@ -60,7 +60,7 @@ const createClass = async (req, res) => {
 }
 
 const enrollStudents = async (req, res) => {
-    const students = req.body.students
+    const { students, classname } = req.body
     try {
         students === undefined
             ? res.status(SC.BAD_REQUEST).json({
@@ -76,9 +76,17 @@ const enrollStudents = async (req, res) => {
                       }
                   )
                   .then(() => {
-                      res.status(SC.OK).json({
-                          message: 'Students enrolled successfully!'
-                      })
+                      let ids = students.map((x) => x.studentId)
+                      userModel
+                          .updateMany(
+                              { _id: { $in: ids } },
+                              { $addToSet: { classAttended: classname } }
+                          )
+                          .then(() => {
+                              res.status(SC.OK).json({
+                                  message: 'Students enrolled successfully!'
+                              })
+                          })
                   })
                   .catch(() => {
                       res.status(SC.BAD_REQUEST).json({
@@ -296,9 +304,29 @@ const markAttendance = async (req, res) => {
                 }
             )
             .then(() => {
-                res.status(SC.OK).json({
-                    message: 'Attendance marked successfully!'
-                })
+                if (req.body.attendence) {
+                    userModel
+                        .updateOne(
+                            { _id: req.params.studentId },
+                            { $addToSet: { classAttended: req.body.className } }
+                        )
+                        .then(() => {
+                            res.status(SC.OK).json({
+                                message: 'Attendance marked successfully!'
+                            })
+                        })
+                } else {
+                    userModel
+                        .updateOne(
+                            { _id: req.params.studentId },
+                            { $pull: { classAttended: req.body.className } }
+                        )
+                        .then(() => {
+                            res.status(SC.OK).json({
+                                message: 'Attendance marked successfully!'
+                            })
+                        })
+                }
             })
             .catch((err) => {
                 res.status(SC.BAD_REQUEST).json({

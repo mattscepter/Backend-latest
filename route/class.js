@@ -80,7 +80,7 @@ router.delete(
 )
 
 router.put(
-    '/class/attendence/:id',
+    '/class/attendence/:id/:studentId',
     isSignedIn,
     isValidToken,
     isAdminOrInstructor,

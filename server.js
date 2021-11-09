@@ -35,6 +35,7 @@ const message = require('./route/message')
 const classes = require('./route/class')
 const bucket = require('./route/bucket')
 const courseMaterial = require('./route/courseMaterial')
+const constant = require('./route/constants')
 
 //built-in middlewares
 app.use(express.static('public'))
@@ -60,6 +61,7 @@ app.use('/api', message)
 app.use('/api', classes)
 app.use('/api', bucket)
 app.use('/api', courseMaterial)
+app.use('/api', constant)
 
 const PORT = process.env.PORT || 8000
 
