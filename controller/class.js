@@ -283,6 +283,36 @@ const deleteClassById = async (req, res) => {
     }
 }
 
+const markAttendance = async (req, res) => {
+    try {
+        await classModel
+            .updateOne(
+                { 'students._id': req.params.id },
+                {
+                    $set: {
+                        'students.$.attendence': req.body.attendence,
+                        'students.$.note': req.body.note
+                    }
+                }
+            )
+            .then(() => {
+                res.status(SC.OK).json({
+                    message: 'Attendance marked successfully!'
+                })
+            })
+            .catch((err) => {
+                res.status(SC.BAD_REQUEST).json({
+                    error: 'Marking attendance from DB is failed!'
+                })
+                logger(err, 'ERROR')
+            })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Mark Attendance Function is Executed!')
+    }
+}
+
 module.exports = {
     createClass,
     enrollStudents,
@@ -291,5 +321,6 @@ module.exports = {
     getClassById,
     getAllClasses,
     getStudentClasses,
-    deleteClassById
+    deleteClassById,
+    markAttendance
 }
