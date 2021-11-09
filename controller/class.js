@@ -70,7 +70,7 @@ const enrollStudents = async (req, res) => {
                   .updateOne(
                       { _id: req.params.classId },
                       {
-                          $set: {
+                          $push: {
                               students
                           }
                       }
