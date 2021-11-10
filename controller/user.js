@@ -38,17 +38,19 @@ const getUser = (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        await userModel.find({}).exec((err, user) => {
-            if (err || !user) {
-                return res.status(SC.NOT_FOUND).json({
-                    error: 'No users were found in a DB!'
+        await userModel
+            .find({}, { salt: 0, encrypted_password: 0 })
+            .exec((err, user) => {
+                if (err || !user) {
+                    return res.status(SC.NOT_FOUND).json({
+                        error: 'No users were found in a DB!'
+                    })
+                }
+                res.status(SC.OK).json({
+                    message: 'User Fetched Successfully!',
+                    data: user
                 })
-            }
-            res.status(SC.OK).json({
-                message: 'User Fetched Successfully!',
-                data: user
             })
-        })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {

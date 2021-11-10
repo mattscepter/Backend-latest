@@ -1,3 +1,8 @@
+/**
+ * @author utkarsh
+ */
+
+const progressModel = require('../model/progress')
 const courseModel = require('../model/courseMaterial/course')
 const moduleModel = require('../model/courseMaterial/modules')
 const chapterModel = require('../model/courseMaterial/chapters')
@@ -8,15 +13,52 @@ const { loggerUtil: logger } = require('../utils/logger')
 const fs = require('fs')
 
 const buyCourse = async (req, res) => {
-    const { courseId } = req.body
-    const authId = req.auth._id
+    const { courseId, userId } = req.body
     try {
         await userModel
-            .updateOne({ _id: authId }, { $addToSet: { courses: courseId } })
-            .then(() => {
-                return res.status(SC.OK).json({
-                    message: `Course added successfully!`
-                })
+            .findOne({ _id: userId })
+            .then((data) => {
+                if (data.courses.length === 0) {
+                    userModel
+                        .updateOne(
+                            { _id: userId },
+                            { $addToSet: { courses: courseId } }
+                        )
+                        .then(() => {
+                            const progress = new progressModel({
+                                userId,
+                                courses: [{ courseId }]
+                            })
+                            progress.save().then(() => {
+                                res.status(SC.OK).json({
+                                    message: `Course added successfully!`
+                                })
+                            })
+                        })
+                        .catch((err) => {
+                            logger(err, 'ERROR')
+                            return res.status(SC.BAD_REQUEST).json({
+                                error: 'Error adding course'
+                            })
+                        })
+                } else {
+                    userModel
+                        .updateOne(
+                            { _id: userId },
+                            { $addToSet: { courses: courseId } }
+                        )
+                        .then(() => {
+                            res.status(SC.OK).json({
+                                message: `Course added successfully!`
+                            })
+                        })
+                        .catch((err) => {
+                            logger(err, 'ERROR')
+                            return res.status(SC.BAD_REQUEST).json({
+                                error: 'Error adding course'
+                            })
+                        })
+                }
             })
             .catch((err) => {
                 logger(err, 'ERROR')

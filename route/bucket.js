@@ -10,7 +10,9 @@ const {
     updateBucketStatus,
     getBucketById,
     getAllBuckets,
-    deleteBucketById
+    deleteBucketById,
+    enrollStudents,
+    removeStudents
 } = require('../controller/bucket')
 const {
     isSignedIn,
@@ -43,6 +45,22 @@ router.put(
 )
 
 router.get('/bucket/get/:bucketId', isSignedIn, isValidToken, getBucketById)
+
+router.put(
+    '/bucket/enroll/:bucketId',
+    isSignedIn,
+    isValidToken,
+    isAdminOrInstructor,
+    enrollStudents
+)
+
+router.put(
+    '/bucket/remove-student/:bucketId',
+    isSignedIn,
+    isValidToken,
+    isAdminOrInstructor,
+    removeStudents
+)
 
 router.get(
     '/bucket/get-all',
