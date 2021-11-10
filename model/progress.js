@@ -18,7 +18,6 @@ const progressSchema = new mongoose.Schema(
                     type: mongoose.Schema.ObjectId,
                     default: null
                 },
-                currentSlide: { type: mongoose.Schema.ObjectId, default: null },
                 currentChapterTimestamp: { type: Number, default: 0 }
             }
         ]

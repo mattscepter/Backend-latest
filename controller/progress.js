@@ -61,8 +61,8 @@ const updateCurrentModule = async (req, res) => {
                 { userId, 'courses._id': id },
                 {
                     $set: {
-                        'courses.$.moduleId': moduleId,
-                        'courses.$.chapterId': chapterId,
+                        'courses.$.currentModule': moduleId,
+                        'courses.$.currentChapter': chapterId,
                         'courses.$.currentChapterTimestamp': 0
                     }
                 }
@@ -94,7 +94,7 @@ const updateCurrentChapter = async (req, res) => {
                 { userId, 'courses._id': id },
                 {
                     $set: {
-                        'courses.$.chapterId': chapterId,
+                        'courses.$.currentChapter': chapterId,
                         'courses.$.currentChapterTimestamp': 0
                     }
                 }

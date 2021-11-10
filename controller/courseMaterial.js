@@ -48,9 +48,16 @@ const buyCourse = async (req, res) => {
                             { $addToSet: { courses: courseId } }
                         )
                         .then(() => {
-                            res.status(SC.OK).json({
-                                message: `Course added successfully!`
-                            })
+                            progressModel
+                                .updateOne(
+                                    { userId },
+                                    { $push: { courses: { courseId } } }
+                                )
+                                .then(() => {
+                                    res.status(SC.OK).json({
+                                        message: `Course added successfully!`
+                                    })
+                                })
                         })
                         .catch((err) => {
                             logger(err, 'ERROR')
@@ -117,6 +124,40 @@ const getAllCourse = async (req, res) => {
         logger(error, 'ERROR')
     } finally {
         logger('Fetch All Course Function is Executed')
+    }
+}
+
+const getUsersCourses = async (req, res) => {
+    const _id = req.auth._id
+    try {
+        userModel
+            .findOne({ _id })
+            .then((data) => {
+                courseModel
+                    .find({ _id: { $in: data.courses } })
+                    .then((courseData) => {
+                        res.status(SC.OK).json({
+                            message: `Course fetched successfully!`,
+                            data: courseData
+                        })
+                    })
+                    .catch((err) => {
+                        logger(err, 'ERROR')
+                        return res.status(SC.BAD_REQUEST).json({
+                            error: 'Error fetching course'
+                        })
+                    })
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                return res.status(SC.BAD_REQUEST).json({
+                    error: 'User does not exists'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Fetch Users Course Function is Executed')
     }
 }
 
@@ -659,6 +700,7 @@ module.exports = {
     addSlide,
     addQuestion,
     getAllCourse,
+    getUsersCourses,
     getCourse,
     getModule,
     getChapter,

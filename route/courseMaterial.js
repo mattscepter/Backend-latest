@@ -7,6 +7,7 @@ const {
     addSlide,
     addQuestion,
     getAllCourse,
+    getUsersCourses,
     getCourse,
     getModule,
     getChapter,
@@ -66,6 +67,14 @@ router.get(
     isAdmin,
     getAllCourse
 )
+
+router.get(
+    '/material/getUsersCourses',
+    isSignedIn,
+    isValidToken,
+    getUsersCourses
+)
+
 router.get(
     '/material/getCourse/:courseId',
     isSignedIn,
