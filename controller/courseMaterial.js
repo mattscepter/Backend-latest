@@ -13,6 +13,75 @@ const { loggerUtil: logger } = require('../utils/logger')
 const fs = require('fs')
 
 const buyCourse = async (req, res) => {
+    const { courseId } = req.body
+    const userId = req.auth._id
+    try {
+        await userModel
+            .findOne({ _id: userId })
+            .then((data) => {
+                if (data.courses.length === 0) {
+                    userModel
+                        .updateOne(
+                            { _id: userId },
+                            { $addToSet: { courses: courseId } }
+                        )
+                        .then(() => {
+                            const progress = new progressModel({
+                                userId,
+                                courses: [{ courseId }]
+                            })
+                            progress.save().then(() => {
+                                res.status(SC.OK).json({
+                                    message: `Course added successfully!`
+                                })
+                            })
+                        })
+                        .catch((err) => {
+                            logger(err, 'ERROR')
+                            return res.status(SC.BAD_REQUEST).json({
+                                error: 'Error adding course'
+                            })
+                        })
+                } else {
+                    userModel
+                        .updateOne(
+                            { _id: userId },
+                            { $addToSet: { courses: courseId } }
+                        )
+                        .then(() => {
+                            progressModel
+                                .updateOne(
+                                    { userId },
+                                    { $push: { courses: { courseId } } }
+                                )
+                                .then(() => {
+                                    res.status(SC.OK).json({
+                                        message: `Course added successfully!`
+                                    })
+                                })
+                        })
+                        .catch((err) => {
+                            logger(err, 'ERROR')
+                            return res.status(SC.BAD_REQUEST).json({
+                                error: 'Error adding course'
+                            })
+                        })
+                }
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                return res.status(SC.BAD_REQUEST).json({
+                    error: 'Error adding course'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Buy Course Function is Executed')
+    }
+}
+
+const buyCourseAdmin = async (req, res) => {
     const { courseId, userId } = req.body
     try {
         await userModel
@@ -650,8 +719,14 @@ const getSlideImage = async (req, res) => {
                     logger(err, 'ERROR')
                 }
                 if (data) {
-                    res.set('Content-Type', data?.slides[0]?.contentType)
-                    return res.status(SC.OK).send(data?.slides[0]?.data)
+                    if (data.slides[0].data !== null) {
+                        res.set('Content-Type', data?.slides[0]?.contentType)
+                        return res.status(SC.OK).send(data?.slides[0]?.data)
+                    } else {
+                        res.status(SC.NOT_FOUND).json({
+                            error: 'No Slide photo found!'
+                        })
+                    }
                 } else {
                     res.status(SC.NOT_FOUND).json({
                         error: 'No Slide photo found!'
@@ -692,8 +767,48 @@ const deleteSlide = async (req, res) => {
     }
 }
 
+const getDuration = async (req, res) => {
+    const { chapters } = req.body
+    try {
+        await chapterModel
+            .find(
+                { _id: { $in: chapters } },
+                {
+                    slides: 0,
+                    _id: 0,
+                    __v: 0,
+                    name: 0,
+                    description: 0,
+                    moduleId: 0,
+                    courseId: 0,
+                    createdAt: 0,
+                    updatedAt: 0
+                }
+            )
+            .then((data) => {
+                if (data) {
+                    res.status(SC.OK).json({
+                        message: `Duration fetched successfully`,
+                        data: data
+                    })
+                }
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                return res.status(SC.BAD_REQUEST).json({
+                    error: 'Error fetching duration'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Fetch Duration Function is Executed')
+    }
+}
+
 module.exports = {
     buyCourse,
+    buyCourseAdmin,
     createCourse,
     createModule,
     createChapter,
@@ -711,5 +826,6 @@ module.exports = {
     deleteSlide,
     editChapter,
     editModule,
-    editCourse
+    editCourse,
+    getDuration
 }

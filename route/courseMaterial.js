@@ -1,6 +1,7 @@
 const express = require('express')
 const {
     buyCourse,
+    buyCourseAdmin,
     createCourse,
     createModule,
     createChapter,
@@ -18,7 +19,8 @@ const {
     deleteSlide,
     editChapter,
     editModule,
-    editCourse
+    editCourse,
+    getDuration
 } = require('../controller/courseMaterial')
 const {
     isValidToken,
@@ -29,6 +31,13 @@ const {
 const router = express.Router()
 
 router.post('/material/buyCourse', isSignedIn, isValidToken, buyCourse)
+router.post(
+    '/material/buyCourseAdmin',
+    isSignedIn,
+    isValidToken,
+    isAdmin,
+    buyCourseAdmin
+)
 
 router.post(
     '/material/addCourse',
@@ -60,13 +69,7 @@ router.put(
     addQuestion
 )
 
-router.get(
-    '/material/getAllCourses',
-    isSignedIn,
-    isValidToken,
-    isAdmin,
-    getAllCourse
-)
+router.get('/material/getAllCourses', isSignedIn, isValidToken, getAllCourse)
 
 router.get(
     '/material/getUsersCourses',
@@ -147,5 +150,7 @@ router.put(
     isAdmin,
     editChapter
 )
+
+router.get('/material/getDuration', isSignedIn, isValidToken, getDuration)
 
 module.exports = router

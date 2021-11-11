@@ -54,22 +54,25 @@ const getProgress = async (req, res) => {
 
 const updateCurrentModule = async (req, res) => {
     const userId = req.auth._id
-    const { chapterId, moduleId, id } = req.body
+    const { chapterId, moduleId, duration, id } = req.body
     try {
         await progressModel
-            .updateOne(
+            .findOneAndUpdate(
                 { userId, 'courses._id': id },
                 {
                     $set: {
                         'courses.$.currentModule': moduleId,
-                        'courses.$.currentChapter': chapterId,
-                        'courses.$.currentChapterTimestamp': 0
+                        'courses.$.currentChapter.chapterId': chapterId,
+                        'courses.$.currentChapter.currentChapterTimestamp':
+                            duration
                     }
-                }
+                },
+                { new: true }
             )
-            .then(() => {
+            .then((data) => {
                 res.status(SC.OK).json({
-                    message: 'Updated current module successfully'
+                    message: 'Updated current module successfully',
+                    data: data
                 })
             })
             .catch((err) => {
@@ -87,21 +90,25 @@ const updateCurrentModule = async (req, res) => {
 
 const updateCurrentChapter = async (req, res) => {
     const userId = req.auth._id
-    const { chapterId, id } = req.body
+    const { chapterId, duration, id } = req.body
     try {
         await progressModel
-            .updateOne(
+            .findOneAndUpdate(
                 { userId, 'courses._id': id },
                 {
                     $set: {
-                        'courses.$.currentChapter': chapterId,
-                        'courses.$.currentChapterTimestamp': 0
+                        'courses.$.currentChapter.chapterId': chapterId,
+                        'courses.$.currentChapter.currentChapterTimestamp':
+                            duration,
+                        'courses.$.currentChapter.currentSlide': 0
                     }
-                }
+                },
+                { new: true }
             )
-            .then(() => {
+            .then((data) => {
                 res.status(SC.OK).json({
-                    message: 'Updated current chapter successfully'
+                    message: 'Updated current chapter successfully',
+                    data: data
                 })
             })
             .catch((err) => {
@@ -117,6 +124,39 @@ const updateCurrentChapter = async (req, res) => {
     }
 }
 
+const updateCurrentSlide = async (req, res) => {
+    const userId = req.auth._id
+    const { index, id } = req.body
+    try {
+        await progressModel
+            .findOneAndUpdate(
+                { userId, 'courses._id': id },
+                {
+                    $set: {
+                        'courses.$.currentChapter.currentSlide': index
+                    }
+                },
+                { new: true }
+            )
+            .then((data) => {
+                res.status(SC.OK).json({
+                    message: 'Updated current slide successfully',
+                    data: data
+                })
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                res.status(SC.BAD_REQUEST).json({
+                    error: 'Error updating current slide'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Update Current Slide Function is Executed')
+    }
+}
+
 const updateCurrentTimestamp = async (req, res) => {
     const userId = req.auth._id
     const { time, id } = req.body
@@ -126,7 +166,7 @@ const updateCurrentTimestamp = async (req, res) => {
                 { userId, 'courses._id': id },
                 {
                     $set: {
-                        'courses.$.currentChapterTimestamp': time
+                        'courses.$.currentChapter.currentChapterTimestamp': time
                     }
                 }
             )
@@ -148,10 +188,79 @@ const updateCurrentTimestamp = async (req, res) => {
     }
 }
 
+const updateCompletedModule = async (req, res) => {
+    const userId = req.auth._id
+    const { moduleId, id } = req.body
+    try {
+        await progressModel
+            .findOneAndUpdate(
+                { userId, 'courses._id': id },
+                {
+                    $push: {
+                        'courses.$.completedModules': { moduleId }
+                    }
+                },
+                { new: true }
+            )
+            .then((data) => {
+                res.status(SC.OK).json({
+                    message: 'Updated completed module successfully',
+                    data: data
+                })
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                res.status(SC.BAD_REQUEST).json({
+                    error: 'Error updating completed module'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Update Completed Module Function is Executed')
+    }
+}
+
+const updateCompletedChapter = async (req, res) => {
+    const userId = req.auth._id
+    const { chapterId, id } = req.body
+    try {
+        await progressModel
+            .findOneAndUpdate(
+                { userId, 'courses._id': id },
+                {
+                    $push: {
+                        'courses.$.completedChapters': { chapterId }
+                    }
+                },
+                { new: true }
+            )
+            .then((data) => {
+                res.status(SC.OK).json({
+                    message: 'Updated completed chapter successfully',
+                    data: data
+                })
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                res.status(SC.BAD_REQUEST).json({
+                    error: 'Error updating completed chapter'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Update Completed Chapter Function is Executed')
+    }
+}
+
 module.exports = {
     getAllProgress,
     getProgress,
     updateCurrentModule,
     updateCurrentChapter,
-    updateCurrentTimestamp
+    updateCurrentSlide,
+    updateCurrentTimestamp,
+    updateCompletedModule,
+    updateCompletedChapter
 }

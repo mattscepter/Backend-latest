@@ -4,7 +4,10 @@ const {
     getProgress,
     updateCurrentModule,
     updateCurrentChapter,
-    updateCurrentTimestamp
+    updateCurrentSlide,
+    updateCurrentTimestamp,
+    updateCompletedModule,
+    updateCompletedChapter
 } = require('../controller/progress')
 const {
     isValidToken,
@@ -26,11 +29,33 @@ router.put(
     isValidToken,
     updateCurrentChapter
 )
+
+router.put(
+    `/progress/updateSlide`,
+    isSignedIn,
+    isValidToken,
+    updateCurrentSlide
+)
+
 router.put(
     `/progress/updateTimestamp`,
     isSignedIn,
     isValidToken,
     updateCurrentTimestamp
+)
+
+router.put(
+    `/progress/updateCompletedModule`,
+    isSignedIn,
+    isValidToken,
+    updateCompletedModule
+)
+
+router.put(
+    `/progress/updateCompletedChapter`,
+    isSignedIn,
+    isValidToken,
+    updateCompletedChapter
 )
 
 router.get(
