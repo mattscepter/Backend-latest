@@ -39,7 +39,8 @@ const progressSchema = new mongoose.Schema(
                             }
                         },
                         { timestamps: true }
-                    )
+                    ),
+                    default: null
                 },
                 currentChapter: {
                     type: new mongoose.Schema(
@@ -51,7 +52,8 @@ const progressSchema = new mongoose.Schema(
                             currrentSlide: { type: Number, default: 0 }
                         },
                         { timestamps: true }
-                    )
+                    ),
+                    default: null
                 },
                 currentChapterTimestamp: {
                     type: Number,

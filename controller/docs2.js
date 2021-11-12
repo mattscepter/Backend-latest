@@ -86,7 +86,7 @@ const reuploadDoc = async (req, res) => {
                         {
                             data: fileData,
                             contentType: fileType,
-                            isApproved: false,
+                            isApproved: null,
                             note: ''
                         }
                     )
