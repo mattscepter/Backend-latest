@@ -101,7 +101,7 @@ const enrollStudents = async (req, res) => {
 }
 
 const removeStudents = async (req, res) => {
-    const students = req.body.students
+    const { students, classname } = req.body
     try {
         await classModel
             .updateOne(
@@ -117,9 +117,17 @@ const removeStudents = async (req, res) => {
                 }
             )
             .then(() => {
-                res.status(SC.OK).json({
-                    message: 'Student removed successfully from this class!'
-                })
+                userModel
+                    .updateMany(
+                        { _id: { $in: students } },
+                        { $pull: { classAttended: classname } }
+                    )
+                    .then(() => {
+                        res.status(SC.OK).json({
+                            message:
+                                'Student removed successfully from this class!'
+                        })
+                    })
             })
             .catch((err) => {
                 res.status(SC.BAD_REQUEST).json({
@@ -231,16 +239,19 @@ const getAllClasses = async (req, res) => {
 }
 
 const getStudentClasses = async (req, res) => {
-    const studentId = req.params.studentId
+    const studentId = req.auth._id
     try {
         await classModel
-            .find({
-                students: {
-                    $elemMatch: {
-                        studentId: studentId
+            .find(
+                {
+                    students: {
+                        $elemMatch: {
+                            studentId: studentId
+                        }
                     }
-                }
-            })
+                },
+                { students: 0, noOfSpots: 0 }
+            )
             .exec((err, data) => {
                 if (err) {
                     logger(err, 'ERROR')

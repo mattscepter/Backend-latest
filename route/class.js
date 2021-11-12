@@ -63,13 +63,7 @@ router.get(
     getAllClasses
 )
 
-router.get(
-    '/class/get-student/:studentId',
-    isSignedIn,
-    isValidToken,
-    isAdminOrInstructor,
-    getStudentClasses
-)
+router.get('/class/get-student', isSignedIn, isValidToken, getStudentClasses)
 
 router.delete(
     '/class/delete/:classId',
