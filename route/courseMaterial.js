@@ -151,6 +151,6 @@ router.put(
     editChapter
 )
 
-router.get('/material/getDuration', isSignedIn, isValidToken, getDuration)
+router.post('/material/getDuration', isSignedIn, isValidToken, getDuration)
 
 module.exports = router

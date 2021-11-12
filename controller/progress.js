@@ -61,10 +61,9 @@ const updateCurrentModule = async (req, res) => {
                 { userId, 'courses._id': id },
                 {
                     $set: {
-                        'courses.$.currentModule': moduleId,
-                        'courses.$.currentChapter.chapterId': chapterId,
-                        'courses.$.currentChapter.currentChapterTimestamp':
-                            duration
+                        'courses.$.currentModule': { moduleId },
+                        'courses.$.currentChapter': { chapterId },
+                        'courses.$.currentChapterTimestamp': duration
                     }
                 },
                 { new: true }
@@ -98,8 +97,7 @@ const updateCurrentChapter = async (req, res) => {
                 {
                     $set: {
                         'courses.$.currentChapter.chapterId': chapterId,
-                        'courses.$.currentChapter.currentChapterTimestamp':
-                            duration,
+                        'courses.$.currentChapterTimestamp': duration,
                         'courses.$.currentChapter.currentSlide': 0
                     }
                 },
@@ -166,7 +164,7 @@ const updateCurrentTimestamp = async (req, res) => {
                 { userId, 'courses._id': id },
                 {
                     $set: {
-                        'courses.$.currentChapter.currentChapterTimestamp': time
+                        'courses.$.currentChapterTimestamp': time
                     }
                 }
             )

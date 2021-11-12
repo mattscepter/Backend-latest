@@ -769,6 +769,7 @@ const deleteSlide = async (req, res) => {
 
 const getDuration = async (req, res) => {
     const { chapters } = req.body
+    console.log(chapters)
     try {
         await chapterModel
             .find(
@@ -786,10 +787,14 @@ const getDuration = async (req, res) => {
                 }
             )
             .then((data) => {
+                let min = 0
+                data.forEach((element) => {
+                    min = min + element.duration
+                })
                 if (data) {
                     res.status(SC.OK).json({
                         message: `Duration fetched successfully`,
-                        data: data
+                        data: min
                     })
                 }
             })

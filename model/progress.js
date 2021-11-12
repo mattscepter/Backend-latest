@@ -31,16 +31,31 @@ const progressSchema = new mongoose.Schema(
                     }
                 ],
                 currentModule: {
-                    type: mongoose.Schema.ObjectId,
-                    default: null
+                    type: new mongoose.Schema(
+                        {
+                            moduleId: {
+                                type: mongoose.Schema.ObjectId,
+                                default: null
+                            }
+                        },
+                        { timestamps: true }
+                    )
                 },
                 currentChapter: {
-                    chapterId: {
-                        type: mongoose.Schema.ObjectId,
-                        default: null
-                    },
-                    currentChapterTimestamp: { type: Number, default: 0 },
-                    currrentSlide: { type: Number, default: 0 }
+                    type: new mongoose.Schema(
+                        {
+                            chapterId: {
+                                type: mongoose.Schema.ObjectId,
+                                default: null
+                            },
+                            currrentSlide: { type: Number, default: 0 }
+                        },
+                        { timestamps: true }
+                    )
+                },
+                currentChapterTimestamp: {
+                    type: Number,
+                    default: 0
                 }
             }
         ]
