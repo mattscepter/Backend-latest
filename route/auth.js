@@ -12,7 +12,8 @@ const {
     updateRole,
     signout,
     googleLogin,
-    facebookLogin
+    facebookLogin,
+    changePassword
 } = require('../controller/auth')
 
 const {
@@ -41,6 +42,18 @@ router.post(
             .withMessage('Password field is required')
     ],
     signin
+)
+
+router.post(
+    '/change-password',
+    [
+        check('newPassword')
+            .isLength({ min: 6 })
+            .withMessage('New Password should be minimum of 6 characters')
+    ],
+    isSignedIn,
+    isValidToken,
+    changePassword
 )
 
 router.post('/googlelogin', googleLogin)

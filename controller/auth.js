@@ -97,6 +97,29 @@ const update = async (req, res) => {
     }
 }
 
+const updateRole = async (req, res) => {
+    const { role } = req.body
+    try {
+        await userModel
+            .updateOne({ _id: req.params.userId }, { role })
+            .then(() => {
+                res.status(SC.OK).json({
+                    message: 'User Updated Successfully!'
+                })
+            })
+            .catch((err) => {
+                res.status(SC.INTERNAL_SERVER_ERROR).json({
+                    error: 'User Updation Failed!'
+                })
+                logger(err, 'ERROR')
+            })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger(`User Role Update Function Executed`)
+    }
+}
+
 const signin = async (req, res) => {
     const errors = validate(req)
     if (!errors.isEmpty()) {
@@ -144,26 +167,58 @@ const signin = async (req, res) => {
     }
 }
 
-const updateRole = async (req, res) => {
-    const { role } = req.body
+const changePassword = async (req, res) => {
+    const userId = req.auth._id
+    const errors = validate(req)
+    if (!errors.isEmpty()) {
+        return res.status(SC.WRONG_ENTITY).json({
+            error: errors.array()[0].msg
+        })
+    }
+    const { oldPassword, newPassword } = req.body
     try {
-        await userModel
-            .updateOne({ _id: req.params.userId }, { role })
-            .then(() => {
-                res.status(SC.OK).json({
-                    message: 'User Updated Successfully!'
-                })
+        if (oldPassword === newPassword) {
+            return res.status(SC.WRONG_ENTITY).json({
+                error: 'Old and new Password are same!'
             })
-            .catch((err) => {
-                res.status(SC.INTERNAL_SERVER_ERROR).json({
-                    error: 'User Updation Failed!'
+        }
+        await userModel.findOne({ _id: userId }, (err, user) => {
+            if (err || !user) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: "User id doesn't exist in DB!"
                 })
-                logger(err, 'ERROR')
-            })
+            }
+            if (!user.authenticate(oldPassword)) {
+                return res.status(SC.UNAUTHORIZED).json({
+                    error: 'Oops!, Your old password is wrong!!'
+                })
+            } else {
+                userModel
+                    .updateOne(
+                        { _id: userId },
+                        {
+                            $set: {
+                                encrypted_password:
+                                    user.securePassword(newPassword)
+                            }
+                        }
+                    )
+                    .then(() => {
+                        res.status(SC.OK).json({
+                            message: 'User Password changed successfully!'
+                        })
+                    })
+                    .catch(() => {
+                        res.status(SC.BAD_REQUEST).json({
+                            error: 'Password Updation Failed!'
+                        })
+                    })
+            }
+        })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
-        logger(`User Role Update Function Executed`)
+        logger(`Forgot Password Function  Executed`)
     }
 }
 
@@ -346,6 +401,7 @@ const facebookLogin = async (req, res) => {
 module.exports = {
     signup,
     signin,
+    changePassword,
     update,
     updateRole,
     signout,

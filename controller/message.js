@@ -120,7 +120,8 @@ const getAllMessage = async (req, res) => {
     let options = {
         page: 1,
         limit: 10,
-        customLabels: label
+        customLabels: label,
+        sort: { createdAt: -1 }
     }
     req.query.page !== undefined ? (options.page = req.query.page) : null
     req.query.limit !== undefined ? (options.limit = req.query.limit) : null
