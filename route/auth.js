@@ -13,13 +13,16 @@ const {
     signout,
     googleLogin,
     facebookLogin,
-    changePassword
+    changePassword,
+    forgotPassword,
+    forgotPasswordChange
 } = require('../controller/auth')
 
 const {
     isSignedIn,
     isValidToken,
-    isAdmin
+    isAdmin,
+    isForgotPasswordVerified
 } = require('../controller/middleware')
 
 router.post(
@@ -54,6 +57,19 @@ router.post(
     isSignedIn,
     isValidToken,
     changePassword
+)
+
+router.post('/forgot-password', forgotPassword)
+
+router.post(
+    '/forgot-password/verify/:uuid',
+    [
+        check('password')
+            .isLength({ min: 6 })
+            .withMessage('New Password should be minimum of 6 characters')
+    ],
+    isForgotPasswordVerified,
+    forgotPasswordChange
 )
 
 router.post('/googlelogin', googleLogin)

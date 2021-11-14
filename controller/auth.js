@@ -3,13 +3,17 @@
  */
 
 const userModel = require('../model/user.js')
+const forgotPasswordModel = require('../model/forgotPassword')
 const jwt = require('jsonwebtoken')
 const { validationResult: validate } = require('express-validator')
 const fetch = (...args) =>
     import('node-fetch').then(({ default: fetch }) => fetch(...args))
 const { OAuth2Client: OAuth } = require('google-auth-library')
+const nodemailer = require('nodemailer')
 const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
+const { v4: uuid } = require('uuid')
+const moment = require('moment')
 
 const signup = async (req, res) => {
     const errors = validate(req)
@@ -222,6 +226,168 @@ const changePassword = async (req, res) => {
     }
 }
 
+const forgotPassword = async (req, res) => {
+    const email = req.body.email
+    const url = req.body.url
+    const transporter = nodemailer.createTransport({
+        service: 'google',
+        pool: true,
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            type: 'OAuth2',
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASS,
+            clientId: process.env.CLIENT_ID,
+            clientSecret: process.env.CLIENT_SECRET,
+            refreshToken: process.env.REFRESH_TOKEN
+        }
+    })
+
+    await userModel.findOne({ email }).exec((err, user) => {
+        if (err) {
+            logger(err, 'ERROR')
+        }
+        if (user) {
+            const randomId = uuid.URL
+            const link = `${url}/forgot-pass/${randomId}`
+            let mailOptions = {
+                from: '"Argus security" <karshchaud@gmail.com>',
+                to: user?.email,
+                subject: 'Forgot Password',
+                text: 'New Message',
+                html: `
+                <h1>Click below link to reset your password</h1>
+                <a href=${link}>click here</a>
+                `
+            }
+            forgotPasswordModel
+                .findOne({ userId: user._id })
+                .exec((err, data) => {
+                    if (err) {
+                        logger(err, 'ERROR')
+                    }
+                    const validity = moment().set(
+                        'hour',
+                        moment().get('hour') + 1
+                    )
+
+                    if (data && moment().diff(data?.validTill, 'minute') <= 0) {
+                        res.status(SC.BAD_REQUEST).json({
+                            error: 'Token has already been sent. Check your mail'
+                        })
+                    } else {
+                        const result = {
+                            userId: user?._id,
+                            name: user?.name,
+                            forgotPasswordUUID: randomId,
+                            validTill: validity
+                        }
+                        transporter
+                            .sendMail(mailOptions)
+                            .then((info) => {
+                                const forgotPassword = new forgotPasswordModel(
+                                    result
+                                )
+                                forgotPassword.save((err) => {
+                                    if (err) {
+                                        return res.status(SC.BAD_REQUEST).json({
+                                            error: 'Failed to update forgot password!'
+                                        })
+                                    }
+                                    res.status(SC.OK).json({
+                                        message:
+                                            'Forgot Password UUID created succeffully and url link has been sent to the user!'
+                                    })
+                                })
+
+                                logger(`Message sent: ${info.messageId}`)
+                            })
+                            .catch((error) => {
+                                logger(error, 'ERROR')
+                                res.status(SC.BAD_REQUEST).json({
+                                    error: 'Forgot Password failed!'
+                                })
+                            })
+                    }
+                })
+        } else {
+            return res.status(SC.NOT_FOUND).json({
+                error: 'User Not Found!'
+            })
+        }
+    })
+}
+
+const forgotPasswordChange = async (req, res) => {
+    const forgotPasswordUUID = req.params.uuid
+    const errors = validate(req)
+    if (!errors.isEmpty()) {
+        return res.status(SC.WRONG_ENTITY).json({
+            error: errors.array()[0].msg
+        })
+    }
+    const { password } = req.body
+    try {
+        await forgotPasswordModel
+            .findOne({ forgotPasswordUUID })
+            .exec((err, data) => {
+                if (err) {
+                    logger(err, 'ERROR')
+                }
+                if (data) {
+                    userModel.findOne({ _id: data?.userId }, (err, user) => {
+                        if (err || !user) {
+                            return res.status(SC.NOT_FOUND).json({
+                                error: "User id doesn't exist in DB!"
+                            })
+                        }
+                        userModel
+                            .updateOne(
+                                { _id: data?.userId },
+                                {
+                                    $set: {
+                                        encrypted_password:
+                                            user.securePassword(password)
+                                    }
+                                }
+                            )
+                            .then(() => {
+                                res.status(SC.OK).json({
+                                    message:
+                                        'User Password changed successfully!'
+                                })
+                                forgotPasswordModel
+                                    .deleteOne({ forgotPasswordUUID })
+                                    .then(() => {
+                                        logger(
+                                            'Forgot Password UUID has been deleted!'
+                                        )
+                                    })
+                                    .catch((err) => {
+                                        logger(err, 'ERROR')
+                                    })
+                            })
+                            .catch(() => {
+                                res.status(SC.BAD_REQUEST).json({
+                                    error: 'Password Updation Failed!'
+                                })
+                            })
+                    })
+                } else {
+                    res.status(SC.NOT_FOUND).json({
+                        error: 'Invalid token'
+                    })
+                }
+            })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger(`Forgot Password Change Function Executed`)
+    }
+}
+
 const signout = (req, res) => {
     res.clearCookie('Token')
 
@@ -402,6 +568,8 @@ module.exports = {
     signup,
     signin,
     changePassword,
+    forgotPassword,
+    forgotPasswordChange,
     update,
     updateRole,
     signout,

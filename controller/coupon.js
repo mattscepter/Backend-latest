@@ -129,6 +129,41 @@ const getAllCoupons = async (req, res) => {
     }
 }
 
+const checkValidity = async (req, res) => {
+    const { couponCode } = req.body
+    try {
+        await couponModel.findOne({ couponCode }).exec((err, data) => {
+            if (err) {
+                logger(err, 'ERROR')
+            }
+            if (data) {
+                if (
+                    data.usage === 0 ||
+                    new Date() > new Date(data.validity) ||
+                    data.usage < 0
+                ) {
+                    res.status(SC.NOT_FOUND).json({
+                        error: 'Coupon has expired'
+                    })
+                } else {
+                    res.status(SC.OK).json({
+                        message: 'Coupons Applied Successfully',
+                        data: data
+                    })
+                }
+            } else {
+                res.status(SC.NOT_FOUND).json({
+                    error: 'Invalid Coupon'
+                })
+            }
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Check Coupon Function is Executed')
+    }
+}
+
 const applyCoupon = async (req, res) => {
     const { couponCode } = req.body
     try {
@@ -137,25 +172,19 @@ const applyCoupon = async (req, res) => {
                 logger(err, 'ERROR')
             }
             if (data) {
-                if (data.usage === 0 || new Date() > new Date(data.validity)) {
-                    res.status(SC.NOT_FOUND).json({
-                        error: 'Coupon has expired'
+                couponModel
+                    .updateOne({ _id: data._id }, { $inc: { usage: -1 } })
+                    .then(() => {
+                        res.status(SC.OK).json({
+                            message: 'Coupons Applied Successfully'
+                        })
                     })
-                } else {
-                    couponModel
-                        .updateOne({ _id: data._id }, { $inc: { usage: -1 } })
-                        .then(() => {
-                            res.status(SC.OK).json({
-                                message: 'Coupons Applied Successfully'
-                            })
+                    .catch((error) => {
+                        logger(error, 'ERROR')
+                        res.status(SC.OK).json({
+                            message: 'Error!! Try again'
                         })
-                        .catch((error) => {
-                            logger(error, 'ERROR')
-                            res.status(SC.OK).json({
-                                message: 'Error!! Try again'
-                            })
-                        })
-                }
+                    })
             } else {
                 res.status(SC.NOT_FOUND).json({
                     error: 'Invalid Coupon'
@@ -203,5 +232,6 @@ module.exports = {
     getCouponById,
     getAllCoupons,
     deleteCouponById,
-    applyCoupon
+    applyCoupon,
+    checkValidity
 }

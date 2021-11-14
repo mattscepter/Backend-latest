@@ -1,5 +1,7 @@
 const userModel = require('../model/user.js')
+const forgotPasswordModel = require('../model/forgotPassword')
 const expressJwt = require('express-jwt')
+const moment = require('moment')
 const { statusCode: SC } = require('../utils/statusCode')
 
 const isSignedIn = expressJwt({
@@ -27,11 +29,11 @@ const isAuthenticated = (req, res, next) => {
     next()
 }
 
-const isEmployee = (req, res, next) => {
+const isEmployee = async (req, res, next) => {
     const authId = req.auth._id
 
     if (authId) {
-        userModel.findById(authId).exec((err, user) => {
+        await userModel.findById(authId).exec((err, user) => {
             if (err || !user) {
                 return res.status(SC.NOT_FOUND).json({
                     error: 'No user was found in DB!'
@@ -40,7 +42,7 @@ const isEmployee = (req, res, next) => {
             if (user.role === 3) {
                 next()
             } else {
-                return res.status(SC.UNAUTHORIZED).json({
+                res.status(SC.UNAUTHORIZED).json({
                     error: 'Not an Employee!'
                 })
             }
@@ -48,11 +50,11 @@ const isEmployee = (req, res, next) => {
     }
 }
 
-const isInstructor = (req, res, next) => {
+const isInstructor = async (req, res, next) => {
     const authId = req.auth._id
 
     if (authId) {
-        userModel.findById(authId).exec((err, user) => {
+        await userModel.findById(authId).exec((err, user) => {
             if (err || !user) {
                 return res.status(SC.NOT_FOUND).json({
                     error: 'No user was found in DB!'
@@ -61,7 +63,7 @@ const isInstructor = (req, res, next) => {
             if (user.role === 4) {
                 next()
             } else {
-                return res.status(SC.UNAUTHORIZED).json({
+                res.status(SC.UNAUTHORIZED).json({
                     error: 'Not a Instructor!'
                 })
             }
@@ -69,11 +71,11 @@ const isInstructor = (req, res, next) => {
     }
 }
 
-const isAdmin = (req, res, next) => {
+const isAdmin = async (req, res, next) => {
     const authId = req.auth._id
 
     if (authId) {
-        userModel.findById(authId).exec((err, user) => {
+        await userModel.findById(authId).exec((err, user) => {
             if (err || !user) {
                 return res.status(SC.NOT_FOUND).json({
                     error: 'No user was found in DB!'
@@ -82,7 +84,7 @@ const isAdmin = (req, res, next) => {
             if (user.role === 2 || user.role === 3 || user.role === 4) {
                 next()
             } else {
-                return res.status(SC.UNAUTHORIZED).json({
+                res.status(SC.UNAUTHORIZED).json({
                     error: 'Not an admin!'
                 })
             }
@@ -90,11 +92,11 @@ const isAdmin = (req, res, next) => {
     }
 }
 
-const isAdminOrInstructor = (req, res, next) => {
+const isAdminOrInstructor = async (req, res, next) => {
     const authId = req.auth._id
 
     if (authId) {
-        userModel.findById(authId).exec((err, user) => {
+        await userModel.findById(authId).exec((err, user) => {
             if (err || !user) {
                 return res.status(SC.NOT_FOUND).json({
                     error: 'No user was found in DB!'
@@ -103,7 +105,7 @@ const isAdminOrInstructor = (req, res, next) => {
             if (user.role === 2 || user.role === 4) {
                 next()
             } else {
-                return res.status(SC.UNAUTHORIZED).json({
+                res.status(SC.UNAUTHORIZED).json({
                     error: 'Not an admin or an Instructor!'
                 })
             }
@@ -111,11 +113,11 @@ const isAdminOrInstructor = (req, res, next) => {
     }
 }
 
-const hasCourseorAdmin = (req, res, next) => {
+const hasCourseorAdmin = async (req, res, next) => {
     const authId = req.auth._id
     const courseId = req.params.courseId
     if (authId) {
-        userModel.findById(authId).exec((err, user) => {
+        await userModel.findById(authId).exec((err, user) => {
             if (err || !user) {
                 return res.status(SC.NOT_FOUND).json({
                     error: 'No user was found in DB!'
@@ -126,12 +128,29 @@ const hasCourseorAdmin = (req, res, next) => {
             } else if (user.courses.includes(courseId)) {
                 next()
             } else {
-                return res.status(SC.UNAUTHORIZED).json({
+                res.status(SC.UNAUTHORIZED).json({
                     error: 'Course not bought'
                 })
             }
         })
     }
+}
+
+const isForgotPasswordVerified = async (req, res, next) => {
+    const forgotPasswordUUID = req.params.uuid
+
+    await forgotPasswordModel.find({ forgotPasswordUUID }).exec((err, data) => {
+        if (err) {
+            logger(err, 'ERROR')
+        }
+        if (data && moment().diff(data.validTill, 'minute') <= 0) {
+            next()
+        } else {
+            res.status(SC.BAD_REQUEST).json({
+                error: 'Forgot Password UUID is not valid!'
+            })
+        }
+    })
 }
 
 module.exports = {
@@ -142,5 +161,6 @@ module.exports = {
     isInstructor,
     isAdmin,
     isAdminOrInstructor,
-    hasCourseorAdmin
+    hasCourseorAdmin,
+    isForgotPasswordVerified
 }
