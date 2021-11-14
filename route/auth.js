@@ -9,6 +9,7 @@ const {
     signup,
     signin,
     update,
+    addEmploymentRecord,
     updateRole,
     signout,
     googleLogin,
@@ -83,6 +84,15 @@ router.put(
     isValidToken,
     update
 )
+
+router.put(
+    '/user/addJobHistory',
+    [check('id').isUUID().withMessage('Please Provide id')],
+    isSignedIn,
+    isValidToken,
+    addEmploymentRecord
+)
+
 router.put(
     '/user/updateRole/:userId',
     isSignedIn,

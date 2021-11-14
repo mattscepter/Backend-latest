@@ -216,21 +216,24 @@ const getClassById = async (req, res) => {
 
 const getAllClasses = async (req, res) => {
     try {
-        await classModel.find({}).exec((err, data) => {
-            if (err) {
-                logger(err, 'ERROR')
-            }
-            if (data) {
-                res.status(SC.OK).json({
-                    message: 'Classes fetched successfully!',
-                    data: data
-                })
-            } else {
-                res.status(SC.NOT_FOUND).json({
-                    error: 'No Classes found!'
-                })
-            }
-        })
+        await classModel
+            .find({})
+            .sort({ createdAt: -1 })
+            .exec((err, data) => {
+                if (err) {
+                    logger(err, 'ERROR')
+                }
+                if (data) {
+                    res.status(SC.OK).json({
+                        message: 'Classes fetched successfully!',
+                        data: data
+                    })
+                } else {
+                    res.status(SC.NOT_FOUND).json({
+                        error: 'No Classes found!'
+                    })
+                }
+            })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {

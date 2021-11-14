@@ -12,6 +12,7 @@ const createMessage = async (req, res) => {
     let result = {
         userId: '',
         userName: '',
+        position: '',
         subject: '',
         message: '',
         recipients: []
@@ -29,6 +30,10 @@ const createMessage = async (req, res) => {
                 data.name !== null
                     ? (result.userName = data.name)
                     : (result.userName = 'unknown')
+                data.role !== null
+                    ? (result.position =
+                          data.role === 2 ? 'Admin' : 'Instructor')
+                    : (result.position = 'unknown')
                 result.subject = subject
                 result.message = message
                 result.recipients = recipients

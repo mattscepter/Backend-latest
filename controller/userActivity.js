@@ -16,7 +16,7 @@ const createActivity = async (req, res) => {
         createdBy: ''
     }
     let userId = req.params.userId
-    const { activityDetails, admin } = req.body
+    const { activityDetails, createdBy } = req.body
     try {
         await userModel.findOne({ _id: userId }).exec((err, data) => {
             if (err) {
@@ -26,9 +26,7 @@ const createActivity = async (req, res) => {
                 result.userId = userId
                 result.userName = data.name
                 result.activityDetails = activityDetails
-                admin !== undefined && admin
-                    ? (result.createdBy = admin)
-                    : (result.createdBy = data.name)
+                result.createdBy = createdBy
 
                 const activityModel = new userActivityModel(result)
                 activityModel.save((err, data) => {

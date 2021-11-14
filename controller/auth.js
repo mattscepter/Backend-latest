@@ -66,15 +66,6 @@ const update = async (req, res) => {
                     error: 'User Not Found!'
                 })
             }
-
-            result.employeeDuration &&
-            result.employeeDuration.from === undefined
-                ? (result.employeeDuration.from = data.employeeDuration.from)
-                : null
-            result.employeeDuration && result.employeeDuration.to === undefined
-                ? (result.employeeDuration.to = data.employeeDuration.to)
-                : null
-
             userModel
                 .updateOne(
                     { _id: id },
@@ -98,6 +89,42 @@ const update = async (req, res) => {
         logger(err, 'ERROR')
     } finally {
         logger('User Update Function is Executed')
+    }
+}
+
+const addEmploymentRecord = async (req, res) => {
+    const id = req.auth._id
+    let result = req.body
+    try {
+        await userModel.findOne({ _id: id }).exec((err, data) => {
+            if (err || !data) {
+                return res.status(SC.NOT_FOUND).json({
+                    error: 'User Not Found!'
+                })
+            }
+            userModel
+                .updateOne(
+                    { _id: id },
+                    {
+                        $push: { employmentRecord: result }
+                    }
+                )
+                .then(() => {
+                    res.status(SC.OK).json({
+                        message: 'User Employment Record Added Successfully!'
+                    })
+                })
+                .catch((err) => {
+                    res.status(SC.INTERNAL_SERVER_ERROR).json({
+                        error: 'User Updation Failed!'
+                    })
+                    logger(err, 'ERROR')
+                })
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('User Employment Record Add Function is Executed')
     }
 }
 
@@ -571,6 +598,7 @@ module.exports = {
     forgotPassword,
     forgotPasswordChange,
     update,
+    addEmploymentRecord,
     updateRole,
     signout,
     googleLogin,

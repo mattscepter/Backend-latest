@@ -170,42 +170,53 @@ const userSchema = new mongoose.Schema(
         },
 
         //employment record
-        category: {
-            type: String,
-            trim: true,
-            default: null
-        },
-        companyName: {
-            type: String,
-            trim: true,
-            default: null
-        },
-        companyAddress: {
-            type: String,
-            trim: true,
-            default: null
-        },
-        employeeDuration: {
-            from: {
-                type: String,
-                trim: true,
-                default: null
-            },
-            to: {
-                type: String,
-                trim: true,
-                default: null
+
+        employmentRecord: [
+            {
+                category: {
+                    type: String,
+                    trim: true,
+                    default: null
+                },
+                companyName: {
+                    type: String,
+                    trim: true,
+                    default: null
+                },
+                companyAddress: {
+                    type: String,
+                    trim: true,
+                    default: null
+                },
+                employeeDurationFrom: {
+                    type: String,
+                    trim: true,
+                    default: null
+                },
+                employeeDurationTo: {
+                    type: String,
+                    trim: true,
+                    default: null
+                },
+                isActive: {
+                    type: String,
+                    enum: ['YES', 'NO', null],
+                    default: null
+                },
+                reasonForLeaving: {
+                    type: String,
+                    trim: true,
+                    default: null
+                }
             }
-        },
-        isActive: {
-            type: String,
-            enum: ['YES', 'NO', null],
-            default: null
-        },
-        reasonForLeaving: {
-            type: String,
-            trim: true,
-            default: null
+        ],
+
+        jobSearch: {
+            looking: String,
+            wantEmail: String,
+            prefferedCity: String,
+            availability: String,
+            wageRange: String
         },
 
         //background declaration
