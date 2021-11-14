@@ -9,7 +9,8 @@ const {
     updateCoupon,
     getCouponById,
     getAllCoupons,
-    deleteCouponById
+    deleteCouponById,
+    applyCoupon
 } = require('../controller/coupon')
 
 const {
@@ -19,6 +20,7 @@ const {
 } = require('../controller/middleware')
 
 router.post('/coupon/create', isSignedIn, isValidToken, isAdmin, createCoupon)
+router.post('/coupon/applyCoupon', isSignedIn, isValidToken, applyCoupon)
 
 router.put(
     '/coupon/update/:couponId',

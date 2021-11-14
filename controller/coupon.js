@@ -10,13 +10,15 @@ const createCoupon = async (req, res) => {
     let result = {
         couponCode: '',
         validity: '',
-        discount: 0
+        discount: 0,
+        usage: 0
     }
-    const { couponCode, validity, discount } = req.body
+    const { couponCode, validity, discount, usage } = req.body
     try {
         result.couponCode = couponCode
         result.validity = new Date(validity)
         result.discount = discount
+        result.usage = usage
 
         await couponModel.findOne({ couponCode }).exec((err, data) => {
             if (err) {
@@ -127,6 +129,46 @@ const getAllCoupons = async (req, res) => {
     }
 }
 
+const applyCoupon = async (req, res) => {
+    const { couponCode } = req.body
+    try {
+        await couponModel.findOne({ couponCode }).exec((err, data) => {
+            if (err) {
+                logger(err, 'ERROR')
+            }
+            if (data) {
+                if (data.usage === 0 || new Date() > new Date(data.validity)) {
+                    res.status(SC.NOT_FOUND).json({
+                        error: 'Coupon has expired'
+                    })
+                } else {
+                    couponModel
+                        .updateOne({ _id: data._id }, { $inc: { usage: -1 } })
+                        .then(() => {
+                            res.status(SC.OK).json({
+                                message: 'Coupons Applied Successfully'
+                            })
+                        })
+                        .catch((error) => {
+                            logger(error, 'ERROR')
+                            res.status(SC.OK).json({
+                                message: 'Error!! Try again'
+                            })
+                        })
+                }
+            } else {
+                res.status(SC.NOT_FOUND).json({
+                    error: 'Invalid Coupon'
+                })
+            }
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Apply Coupon Function is Executed')
+    }
+}
+
 const deleteCouponById = async (req, res) => {
     try {
         await couponModel
@@ -160,5 +202,6 @@ module.exports = {
     updateCoupon,
     getCouponById,
     getAllCoupons,
-    deleteCouponById
+    deleteCouponById,
+    applyCoupon
 }

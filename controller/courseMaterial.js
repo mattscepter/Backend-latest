@@ -256,6 +256,34 @@ const getCourse = async (req, res) => {
     }
 }
 
+const getCourseDetails = async (req, res) => {
+    const courseId = req.params.courseId
+    try {
+        await courseModel
+            .findOne({ _id: courseId })
+            .then((data) => {
+                moduleModel
+                    .find({ courseId }, { description: 0, duration: 0 })
+                    .then((moduleData) => {
+                        res.status(SC.OK).json({
+                            message: `Course fetched successfully!`,
+                            data: { Course: data, Module: moduleData }
+                        })
+                    })
+            })
+            .catch((err) => {
+                logger(err, 'ERROR')
+                return res.status(SC.BAD_REQUEST).json({
+                    error: 'Error fetching course'
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Fetch Course Function is Executed')
+    }
+}
+
 const editCourse = async (req, res) => {
     const courseId = req.params.id
     const { name, description, price } = req.body
@@ -832,5 +860,6 @@ module.exports = {
     editChapter,
     editModule,
     editCourse,
-    getDuration
+    getDuration,
+    getCourseDetails
 }

@@ -20,7 +20,8 @@ const {
     editChapter,
     editModule,
     editCourse,
-    getDuration
+    getDuration,
+    getCourseDetails
 } = require('../controller/courseMaterial')
 const {
     isValidToken,
@@ -85,6 +86,13 @@ router.get(
     hasCourseorAdmin,
     getCourse
 )
+router.get(
+    '/material/getCourseDetails/:courseId',
+    isSignedIn,
+    isValidToken,
+    getCourseDetails
+)
+
 router.get(
     '/material/getModule/:courseId/:id',
     isSignedIn,
