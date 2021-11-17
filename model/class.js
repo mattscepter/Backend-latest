@@ -7,6 +7,10 @@ const mongoose = require('mongoose')
 const classSchema = new mongoose.Schema(
     {
         instructorId: mongoose.Schema.ObjectId,
+        docId: {
+            type: String,
+            required: true
+        },
         instructorName: {
             type: String,
             trim: true

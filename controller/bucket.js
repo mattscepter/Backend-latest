@@ -6,9 +6,11 @@ const bucketModel = require('../model/bucket')
 const userModel = require('../model/user')
 const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
+const { generateDocumentId } = require('../utils/generateId')
 
 const createBucket = async (req, res) => {
     let result = {
+        docId: '',
         bucketName: '',
         noOfStudents: 0,
         students: [],
@@ -21,11 +23,24 @@ const createBucket = async (req, res) => {
     const userId = req.params.userId
     const { bucketName, students } = req.body
     try {
-        await userModel.findOne({ _id: userId }).exec((err, data) => {
+        await userModel.findOne({ _id: userId }).exec(async (err, data) => {
             if (err) {
                 logger(err, 'ERROR')
             }
             if (data) {
+                const prefix = 'BKT'
+                let suffix = 0
+                await bucketModel
+                    .findOne({})
+                    .sort({ createdAt: -1 })
+                    .then((data) => {
+                        if (data?.docId) {
+                            suffix = parseInt(data.docId?.substr(3)) + 1
+                        } else {
+                            suffix = '000000'
+                        }
+                    })
+                result.docId = `${prefix}${generateDocumentId(suffix, 6)}`
                 result.bucketName = bucketName
                 result.students = students
                 result.noOfStudents = students?.length

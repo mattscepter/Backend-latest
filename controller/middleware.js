@@ -29,6 +29,7 @@ const isAuthenticated = (req, res, next) => {
     next()
 }
 
+//role -> 3
 const isEmployee = async (req, res, next) => {
     const authId = req.auth._id
 
@@ -50,6 +51,7 @@ const isEmployee = async (req, res, next) => {
     }
 }
 
+//role --> 4
 const isInstructor = async (req, res, next) => {
     const authId = req.auth._id
 
@@ -71,6 +73,7 @@ const isInstructor = async (req, res, next) => {
     }
 }
 
+//role --> 2
 const isAdmin = async (req, res, next) => {
     const authId = req.auth._id
 
@@ -92,6 +95,7 @@ const isAdmin = async (req, res, next) => {
     }
 }
 
+//--> 2 or 4
 const isAdminOrInstructor = async (req, res, next) => {
     const authId = req.auth._id
 

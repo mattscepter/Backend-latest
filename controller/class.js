@@ -6,9 +6,11 @@ const classModel = require('../model/class')
 const userModel = require('../model/user')
 const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
+const { generateDocumentId } = require('../utils/generateId')
 
 const createClass = async (req, res) => {
     let result = {
+        docId: '',
         instructorId: '',
         instructorName: '',
         classname: '',
@@ -20,38 +22,53 @@ const createClass = async (req, res) => {
     const instructorId = req.params.instructorId
     const { classname, date, location, noOfSpots, students } = req.body
     try {
-        await userModel.findOne({ _id: instructorId }).exec((err, data) => {
-            if (err) {
-                logger(err, 'ERROR')
-            }
-            if (data) {
-                result.instructorId = instructorId
-                result.instructorName = data.name
-                result.classname = classname
-                result.date = date ? date : null
-                result.location = location ? location : null
-                result.noOfSpots = noOfSpots ? noOfSpots : 0
-                result.students = students ? students : []
-
-                const newClass = new classModel(result)
-                newClass.save((err, data) => {
-                    if (err) {
-                        logger(err, 'ERROR')
-                        return res.status(SC.BAD_REQUEST).json({
-                            error: 'Creating Class in DB is failed!'
+        await userModel
+            .findOne({ _id: instructorId })
+            .exec(async (err, data) => {
+                if (err) {
+                    logger(err, 'ERROR')
+                }
+                if (data) {
+                    const prefix = 'CLS'
+                    let suffix = 0
+                    await classModel
+                        .findOne({})
+                        .sort({ createdAt: -1 })
+                        .then((data) => {
+                            if (data?.docId) {
+                                suffix = parseInt(data.docId?.substr(3)) + 1
+                            } else {
+                                suffix = '000000'
+                            }
                         })
-                    }
-                    res.status(SC.OK).json({
-                        message: 'Class created successfully!',
-                        data: data
+                    result.docId = `${prefix}${generateDocumentId(suffix, 6)}`
+                    result.instructorId = instructorId
+                    result.instructorName = data.name
+                    result.classname = classname
+                    result.date = date ? date : null
+                    result.location = location ? location : null
+                    result.noOfSpots = noOfSpots ? noOfSpots : 0
+                    result.students = students ? students : []
+
+                    const newClass = new classModel(result)
+                    newClass.save((err, data) => {
+                        if (err) {
+                            logger(err, 'ERROR')
+                            return res.status(SC.BAD_REQUEST).json({
+                                error: 'Creating Class in DB is failed!'
+                            })
+                        }
+                        res.status(SC.OK).json({
+                            message: 'Class created successfully!',
+                            data: data
+                        })
                     })
-                })
-            } else {
-                res.status(SC.NOT_FOUND).json({
-                    error: 'No Instructor found!'
-                })
-            }
-        })
+                } else {
+                    res.status(SC.NOT_FOUND).json({
+                        error: 'No Instructor found!'
+                    })
+                }
+            })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {

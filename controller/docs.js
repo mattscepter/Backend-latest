@@ -5,7 +5,7 @@
 const docModel = require('../model/docs')
 const formidable = require('formidable')
 const fs = require('fs')
-const _ = require('lodash')
+const { _ } = require('../utils/lodash')
 const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
 

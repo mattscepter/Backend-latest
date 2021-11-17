@@ -6,6 +6,10 @@ const mongoose = require('mongoose')
 
 const bucketSchema = new mongoose.Schema(
     {
+        docId: {
+            type: String,
+            required: true
+        },
         bucketName: {
             type: String,
             required: true,
