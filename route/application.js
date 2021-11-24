@@ -19,7 +19,7 @@ const {
     isAdmin
 } = require('../controller/middleware')
 
-router.post('/application/create', isSignedIn, isValidToken, createApplication)
+router.post('/application/create', createApplication)
 
 router.put(
     '/application/update/:applicationId',

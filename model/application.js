@@ -19,15 +19,18 @@ const appilcationSchema = new mongoose.Schema(
         },
         elegibleToWorkInCanada: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
         },
         eligibilityType: {
             type: String,
-            trim: true
+            trim: true,
+            required: true
         },
         validSecurityGuardLicence: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
         },
         licenceNo: {
             type: String,
@@ -35,23 +38,28 @@ const appilcationSchema = new mongoose.Schema(
         },
         canDrive: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
         },
         highestLevelOfEducation: {
             type: String,
-            trim: true
+            trim: true,
+            required: true
         },
         educationInCanada: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
         },
         priorExperience: {
             type: Boolean,
-            default: false
+            default: false,
+            required: true
         },
         yearsOfExp: {
             type: String,
-            trim: true
+            trim: true,
+            required: true
         }
     },
     { timestamps: true }

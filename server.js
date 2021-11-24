@@ -39,6 +39,7 @@ const constant = require('./route/constants')
 const progress = require('./route/progress')
 const coupon = require('./route/coupon')
 const application = require('./route/application')
+const requirements = require('./route/requirements')
 
 //built-in middlewares
 app.use(express.static('public'))
@@ -68,6 +69,7 @@ app.use('/api', constant)
 app.use('/api', progress)
 app.use('/api', coupon)
 app.use('/api', application)
+app.use('/api', requirements)
 
 const PORT = process.env.PORT || 8000
 

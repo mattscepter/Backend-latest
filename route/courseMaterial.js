@@ -70,7 +70,7 @@ router.put(
     addQuestion
 )
 
-router.get('/material/getAllCourses', isSignedIn, isValidToken, getAllCourse)
+router.get('/material/getAllCourses', getAllCourse)
 
 router.get(
     '/material/getUsersCourses',
