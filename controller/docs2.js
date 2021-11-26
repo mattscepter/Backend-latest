@@ -33,6 +33,7 @@ const createDoc = async (req, res) => {
                                 ' ' +
                                 (response.lastname ? response.lastname : '')
                             docs.userId = userId
+                            docs.userDocId = response?.docId
                             docs.name = fields.name
                             if (file.image) {
                                 if (file.image.size > 3145728) {

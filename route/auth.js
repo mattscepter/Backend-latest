@@ -9,7 +9,11 @@ const {
     signup,
     signin,
     update,
+    updateAdmin,
     addEmploymentRecord,
+    deleteEmploymentRecord,
+    addEmploymentRecordAdmin,
+    deleteEmploymentRecordAdmin,
     updateRole,
     signout,
     googleLogin,
@@ -84,6 +88,13 @@ router.put(
     isValidToken,
     update
 )
+router.put(
+    '/user/updateAdmin/:id',
+    isSignedIn,
+    isValidToken,
+    isAdmin,
+    updateAdmin
+)
 
 router.put(
     '/user/addJobHistory',
@@ -91,6 +102,28 @@ router.put(
     isSignedIn,
     isValidToken,
     addEmploymentRecord
+)
+router.delete(
+    '/user/deleteJobHistory/:id',
+    [check('id').isUUID().withMessage('Please Provide id')],
+    isSignedIn,
+    isValidToken,
+    deleteEmploymentRecord
+)
+
+router.put(
+    '/user/addJobHistoryAdmin/:id',
+    isSignedIn,
+    isValidToken,
+    isAdmin,
+    addEmploymentRecordAdmin
+)
+router.delete(
+    '/user/deleteJobHistoryAdmin/:userId/:id',
+    isSignedIn,
+    isValidToken,
+    isAdmin,
+    deleteEmploymentRecordAdmin
 )
 
 router.put(

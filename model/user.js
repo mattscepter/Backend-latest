@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema(
             default: null
         },
 
+        blocked: {
+            type: Boolean,
+            default: false
+        },
+
         //Course bought
         courses: {
             type: Array,
