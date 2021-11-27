@@ -769,6 +769,28 @@ const facebookLogin = async (req, res) => {
     }
 }
 
+const lastLoggedIn = async (req, res) => {
+    try {
+        const _id = req.auth._id
+        userModel
+            .updateOne({ _id }, { lastLoggedIn: new Date() })
+            .then(() => {
+                res.status(SC.OK).json({
+                    message: 'Last logged in updated'
+                })
+            })
+            .catch(() => {
+                res.status(SC.BAD_REQUEST).json({
+                    error: 'Error updating last logged in'
+                })
+            })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Last Logged In function executed')
+    }
+}
+
 module.exports = {
     signup,
     signin,
@@ -784,5 +806,6 @@ module.exports = {
     updateRole,
     signout,
     googleLogin,
-    facebookLogin
+    facebookLogin,
+    lastLoggedIn
 }

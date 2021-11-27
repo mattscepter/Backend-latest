@@ -66,6 +66,8 @@ const userSchema = new mongoose.Schema(
             default: false
         },
 
+        lastLoggedIn: String,
+
         //Course bought
         courses: {
             type: Array,

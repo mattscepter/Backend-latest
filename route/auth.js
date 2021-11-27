@@ -20,7 +20,8 @@ const {
     facebookLogin,
     changePassword,
     forgotPassword,
-    forgotPasswordChange
+    forgotPasswordChange,
+    lastLoggedIn
 } = require('../controller/auth')
 
 const {
@@ -135,5 +136,7 @@ router.put(
 )
 
 router.get('/signout', signout)
+
+router.put('/user/lastLoggedIn', isSignedIn, isValidToken, lastLoggedIn)
 
 module.exports = router
