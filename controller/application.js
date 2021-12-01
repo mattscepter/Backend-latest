@@ -7,34 +7,8 @@ const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
 
 const createApplication = async (req, res) => {
-    const {
-        name,
-        email,
-        elegibleToWorkInCanada,
-        eligibilityType,
-        validSecurityGuardLicence,
-        licenceNo,
-        canDrive,
-        highestLevelOfEducation,
-        educationInCanada,
-        priorExperience,
-        yearsOfExp
-    } = req.body
-
     try {
-        const application = new applicationModel({
-            name,
-            email,
-            elegibleToWorkInCanada,
-            eligibilityType,
-            validSecurityGuardLicence,
-            licenceNo,
-            canDrive,
-            highestLevelOfEducation,
-            educationInCanada,
-            priorExperience,
-            yearsOfExp
-        })
+        const application = new applicationModel(req.body)
 
         application.save((err, data) => {
             if (err) {

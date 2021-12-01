@@ -66,7 +66,10 @@ const userSchema = new mongoose.Schema(
             default: false
         },
 
-        lastLoggedIn: String,
+        lastLoggedIn: {
+            type: String,
+            default: new Date()
+        },
 
         //Course bought
         courses: {

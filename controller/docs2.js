@@ -12,9 +12,11 @@ const fs = require('fs')
 const createDoc = async (req, res) => {
     const userId = req.auth._id
     const form = new formidable.IncomingForm()
+
     form.keepExtensions = true
     try {
-        await form.parse(req, (err, fields, file) => {
+        form.parse(req, (err, fields, file) => {
+            console.log(err)
             doc2Model
                 .findOne({ userId, name: fields.name })
                 .exec((err, data) => {
@@ -102,6 +104,8 @@ const reuploadDoc = async (req, res) => {
                             error: 'Error updating document'
                         })
                     })
+            } else {
+                console.log('hi')
             }
         })
     } catch (err) {

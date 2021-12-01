@@ -58,7 +58,6 @@ const signup = async (req, res) => {
                         data: {
                             id: user._id,
                             email: user.email,
-                            password: user.encrypted_password,
                             docId: user.docId
                         }
                     })
