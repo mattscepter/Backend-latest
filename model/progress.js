@@ -9,6 +9,20 @@ const progressSchema = new mongoose.Schema(
         userId: mongoose.Schema.ObjectId,
         courses: [
             {
+                courseStatus: {
+                    startedDate: {
+                        type: Date,
+                        default: new Date()
+                    },
+                    completedDate: {
+                        type: Date,
+                        default: null
+                    },
+                    completedStatus: {
+                        type: Boolean,
+                        default: false
+                    }
+                },
                 courseId: { type: mongoose.Schema.ObjectId, default: null },
                 completedModules: [
                     {

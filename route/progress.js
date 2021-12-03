@@ -7,7 +7,8 @@ const {
     updateCurrentSlide,
     updateCurrentTimestamp,
     updateCompletedModule,
-    updateCompletedChapter
+    updateCompletedChapter,
+    courseCompleted
 } = require('../controller/progress')
 const {
     isValidToken,
@@ -67,5 +68,11 @@ router.get(
 )
 
 router.get(`/progress/get`, isSignedIn, isValidToken, getProgress)
+router.put(
+    `/progress/completeCourse`,
+    isSignedIn,
+    isValidToken,
+    courseCompleted
+)
 
 module.exports = router

@@ -56,30 +56,50 @@ const updateCurrentModule = async (req, res) => {
     const userId = req.auth._id
     const { chapterId, moduleId, duration, id } = req.body
     try {
-        await progressModel
-            .findOneAndUpdate(
-                { userId, 'courses._id': id },
-                {
-                    $set: {
-                        'courses.$.currentModule': { moduleId },
-                        'courses.$.currentChapter': { chapterId },
-                        'courses.$.currentChapterTimestamp': duration
-                    }
-                },
-                { new: true }
-            )
-            .then((data) => {
-                res.status(SC.OK).json({
-                    message: 'Updated current module successfully',
-                    data: data
+        if (moduleId !== 'undefined') {
+            await progressModel
+                .findOneAndUpdate(
+                    { userId, 'courses._id': id },
+                    {
+                        $set: {
+                            'courses.$.currentModule': { moduleId },
+                            'courses.$.currentChapter': { chapterId },
+                            'courses.$.currentChapterTimestamp': duration
+                        }
+                    },
+                    { new: true }
+                )
+                .then((data) => {
+                    res.status(SC.OK).json({
+                        message: 'Updated current module successfully',
+                        data: data
+                    })
                 })
-            })
-            .catch((err) => {
-                logger(err, 'ERROR')
-                res.status(SC.BAD_REQUEST).json({
-                    error: 'Error updating current module'
+                .catch((err) => {
+                    logger(err, 'ERROR')
+                    res.status(SC.BAD_REQUEST).json({
+                        error: 'Error updating current module'
+                    })
                 })
-            })
+        } else if (moduleId === 'undefined') {
+            await progressModel
+                .findOneAndUpdate(
+                    { userId, 'courses._id': id },
+                    {
+                        $set: {
+                            'courses.$.courseStatus.completedStatus': true,
+                            'courses.$.courseStatus.completedDate': new Date()
+                        }
+                    },
+                    { new: true }
+                )
+                .then((data) => {
+                    res.status(SC.OK).json({
+                        message: 'Course completed successfully',
+                        data: data
+                    })
+                })
+        }
     } catch (error) {
         logger(error, 'ERROR')
     } finally {
@@ -252,6 +272,37 @@ const updateCompletedChapter = async (req, res) => {
     }
 }
 
+const courseCompleted = async (req, res) => {
+    const userId = req.auth._id
+    const { status, id } = req.body
+
+    try {
+        await progressModel
+            .findOneAndUpdate(
+                { userId, 'courses._id': id },
+                {
+                    $set: {
+                        'courses.$.courseStatus.completedStatus': status,
+                        'courses.$.courseStatus.completedDate': status
+                            ? new Date()
+                            : null
+                    }
+                },
+                { new: true }
+            )
+            .then((data) => {
+                res.status(SC.OK).json({
+                    message: 'Course completed successfully',
+                    data: data
+                })
+            })
+    } catch (error) {
+        logger(error, 'ERROR')
+    } finally {
+        logger('Course Completed Function is Executed')
+    }
+}
+
 module.exports = {
     getAllProgress,
     getProgress,
@@ -260,5 +311,6 @@ module.exports = {
     updateCurrentSlide,
     updateCurrentTimestamp,
     updateCompletedModule,
-    updateCompletedChapter
+    updateCompletedChapter,
+    courseCompleted
 }
