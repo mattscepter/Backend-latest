@@ -40,6 +40,7 @@ const progress = require('./route/progress')
 const coupon = require('./route/coupon')
 const application = require('./route/application')
 const requirements = require('./route/requirements')
+const myPurchases = require('./route/myPurchases')
 
 //built-in middlewares
 app.use(express.static('public'))
@@ -70,6 +71,7 @@ app.use('/api', progress)
 app.use('/api', coupon)
 app.use('/api', application)
 app.use('/api', requirements)
+app.use('/api', myPurchases)
 
 const PORT = process.env.PORT || 8000
 

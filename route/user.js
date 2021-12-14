@@ -9,7 +9,8 @@ const {
     getAllStudents,
     getAllEmployees,
     getAllInsturctors,
-    blockunblock
+    blockunblock,
+    getUserPhoto
 } = require('../controller/user')
 const {
     isSignedIn,
@@ -51,5 +52,6 @@ router.get(
     getAllInsturctors
 )
 router.put('/user/block', isSignedIn, isValidToken, isAdmin, blockunblock)
+router.get('/user/profilePhoto/:id', getUserPhoto)
 
 module.exports = router

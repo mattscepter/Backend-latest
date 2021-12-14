@@ -13,6 +13,18 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         //personal info
+
+        profilePhoto: {
+            data: {
+                type: Buffer,
+                default: null
+            },
+            contentType: {
+                type: String,
+                default: null
+            }
+        },
+
         name: {
             type: String,
             maxlength: 32,

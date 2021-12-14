@@ -6,6 +6,8 @@ const progressModel = require('../model/progress')
 const courseModel = require('../model/courseMaterial/course')
 const moduleModel = require('../model/courseMaterial/modules')
 const chapterModel = require('../model/courseMaterial/chapters')
+const purchaseModel = require('../model/myPurchases')
+
 const userModel = require('../model/user.js')
 const formidable = require('formidable')
 const { statusCode: SC } = require('../utils/statusCode')
@@ -13,7 +15,7 @@ const { loggerUtil: logger } = require('../utils/logger')
 const fs = require('fs')
 
 const buyCourse = async (req, res) => {
-    const { courseId } = req.body
+    const { courseId, desc, name, order, originalPrice, coupon } = req.body
     const userId = req.auth._id
     try {
         await userModel
@@ -25,14 +27,29 @@ const buyCourse = async (req, res) => {
                             { _id: userId },
                             { $addToSet: { courses: courseId } }
                         )
-                        .then(() => {
+                        .then(async () => {
                             const progress = new progressModel({
                                 userId,
                                 courses: [{ courseId }]
                             })
-                            progress.save().then(() => {
+                            const purchase = new purchaseModel({
+                                userId,
+                                itemId: courseId,
+                                itemType: 'Course',
+                                itemDesc: desc,
+                                itemName: name,
+                                paymentObj: order,
+                                itemOriginalPrice: originalPrice,
+                                coupon
+                            })
+                            await progress.save().then(() => {
                                 res.status(SC.OK).json({
                                     message: `Course added successfully!`
+                                })
+                            })
+                            await purchase.save().then(() => {
+                                res.status(SC.OK).json({
+                                    message: `Purchase added successfully!`
                                 })
                             })
                         })
@@ -48,8 +65,8 @@ const buyCourse = async (req, res) => {
                             { _id: userId },
                             { $addToSet: { courses: courseId } }
                         )
-                        .then(() => {
-                            progressModel
+                        .then(async () => {
+                            await progressModel
                                 .updateOne(
                                     { userId },
                                     { $push: { courses: { courseId } } }
@@ -59,6 +76,21 @@ const buyCourse = async (req, res) => {
                                         message: `Course added successfully!`
                                     })
                                 })
+                            const purchase = new purchaseModel({
+                                userId,
+                                itemId: courseId,
+                                itemType: 'Course',
+                                itemDesc: desc,
+                                itemName: name,
+                                paymentObj: order,
+                                itemOriginalPrice: originalPrice,
+                                coupon
+                            })
+                            await purchase.save().then(() => {
+                                res.status(SC.OK).json({
+                                    message: `Purchase added successfully!`
+                                })
+                            })
                         })
                         .catch((err) => {
                             logger(err, 'ERROR')

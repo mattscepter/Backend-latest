@@ -5,6 +5,7 @@
 const userModel = require('../model/user.js')
 const doc2Model = require('../model/doc2')
 const formidable = require('formidable')
+const sharp = require('sharp')
 const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
 const fs = require('fs')
@@ -56,6 +57,28 @@ const createDoc = async (req, res) => {
                                 res.status(SC.OK).json({
                                     message: `Document saved successfully!`
                                 })
+
+                                if (fields.name === 'Profile Photo') {
+                                    sharp(fs.readFileSync(file.image.path))
+                                        .resize(200)
+                                        .jpeg({ mozjpeg: true })
+                                        .toBuffer()
+                                        .then((data) => {
+                                            userModel.updateOne(
+                                                { _id: userId },
+                                                {
+                                                    profilePhoto: {
+                                                        data,
+                                                        contentType:
+                                                            file.image.type
+                                                    }
+                                                }
+                                            )
+                                        })
+                                        .catch((err) => {
+                                            logger(err, 'ERROR')
+                                        })
+                                }
                             })
                         })
                     }
@@ -94,9 +117,29 @@ const reuploadDoc = async (req, res) => {
                         }
                     )
                     .then(() => {
-                        return res.status(SC.OK).json({
+                        res.status(SC.OK).json({
                             message: `Documents updated succesfully!`
                         })
+
+                        if (fields.name === 'Profile Photo') {
+                            sharp(fs.readFileSync(file.image.path))
+                                .resize(200)
+                                .toBuffer()
+                                .then((data) => {
+                                    userModel.updateOne(
+                                        { _id: userId },
+                                        {
+                                            profilePhoto: {
+                                                data,
+                                                contentType: file.image.type
+                                            }
+                                        }
+                                    )
+                                })
+                                .catch((err) => {
+                                    logger(err, 'ERROR')
+                                })
+                        }
                     })
                     .catch((err) => {
                         logger(err, 'ERROR')
@@ -165,6 +208,8 @@ const getAllDocs = async (req, res) => {
     try {
         await doc2Model
             .find({}, { data: 0, contentType: 0 })
+            .sort({ createdAt: -1 })
+
             .exec((err, data) => {
                 if (err) {
                     logger(err, 'ERROR')

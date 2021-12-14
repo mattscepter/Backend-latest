@@ -1,18 +1,24 @@
 const userModel = require('../model/user')
 const { statusCode: SC } = require('../utils/statusCode')
 const { loggerUtil: logger } = require('../utils/logger')
+const fs = require('fs')
 
 const getUserById = async (req, res, next, id) => {
     try {
-        await userModel.findById(id).exec((err, user) => {
-            if (err || !user) {
-                return res.status(SC.NOT_FOUND).json({
-                    error: 'No user was found in DB!'
-                })
-            }
-            req.profile = user
-            next()
-        })
+        await userModel
+            .findById(
+                { _id: id },
+                { salt: 0, encrypted_password: 0, __v: 0, profilePhoto: 0 }
+            )
+            .exec((err, user) => {
+                if (err || !user) {
+                    return res.status(SC.NOT_FOUND).json({
+                        error: 'No user was found in DB!'
+                    })
+                }
+                req.profile = user
+                next()
+            })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
@@ -20,11 +26,38 @@ const getUserById = async (req, res, next, id) => {
     }
 }
 
+const getUserPhoto = async (req, res) => {
+    const userId = req.params.id
+    try {
+        await userModel.findOne({ _id: userId }).exec((err, data) => {
+            if (err) {
+                logger(err, 'ERROR')
+            }
+            if (data) {
+                if (data.profilePhoto.data && data.profilePhoto.contentType) {
+                    res.set('Content-Type', data.profilePhoto.contentType)
+                    return res.status(SC.OK).send(data.profilePhoto.data)
+                } else {
+                    fs.readFile('controller/noImg.png', function (err, data) {
+                        res.set('Content-Type', 'image/png')
+                        return res.status(SC.OK).send(data)
+                    })
+                }
+            } else {
+                res.status(SC.NOT_FOUND).json({
+                    message: 'No User photo is found!'
+                })
+            }
+        })
+    } catch (err) {
+        logger(err, 'ERROR')
+    } finally {
+        logger('Get User Photo Function is Executed')
+    }
+}
+
 const getUser = (req, res) => {
     try {
-        req.profile.salt = undefined
-        req.profile.encry_password = undefined
-        req.profile.__v = undefined
         return res.status(SC.OK).json({
             message: 'User Fetched Successfully!',
             data: req.profile
@@ -39,7 +72,8 @@ const getUser = (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         await userModel
-            .find({}, { salt: 0, encrypted_password: 0 })
+            .find({}, { salt: 0, encrypted_password: 0, profilePhoto: 0 })
+            .sort({ createdAt: -1 })
             .exec((err, user) => {
                 if (err || !user) {
                     return res.status(SC.NOT_FOUND).json({
@@ -60,17 +94,24 @@ const getAllUsers = async (req, res) => {
 
 const getAllStudents = async (req, res) => {
     try {
-        await userModel.find({ role: 1 }).exec((err, user) => {
-            if (err || !user) {
-                return res.status(SC.NOT_FOUND).json({
-                    error: 'No users were found in a DB!'
+        await userModel
+            .find(
+                { role: 1 },
+                { salt: 0, encrypted_password: 0, profilePhoto: 0 }
+            )
+            .sort({ createdAt: -1 })
+
+            .exec((err, user) => {
+                if (err || !user) {
+                    return res.status(SC.NOT_FOUND).json({
+                        error: 'No users were found in a DB!'
+                    })
+                }
+                res.status(SC.OK).json({
+                    message: 'User Fetched Successfully!',
+                    data: user
                 })
-            }
-            res.status(SC.OK).json({
-                message: 'User Fetched Successfully!',
-                data: user
             })
-        })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
@@ -80,17 +121,24 @@ const getAllStudents = async (req, res) => {
 
 const getAllEmployees = async (req, res) => {
     try {
-        await userModel.find({ role: 3 }).exec((err, user) => {
-            if (err || !user) {
-                return res.status(SC.NOT_FOUND).json({
-                    error: 'No users were found in a DB!'
+        await userModel
+            .find(
+                { role: 3 },
+                { salt: 0, encrypted_password: 0, profilePhoto: 0 }
+            )
+            .sort({ createdAt: -1 })
+
+            .exec((err, user) => {
+                if (err || !user) {
+                    return res.status(SC.NOT_FOUND).json({
+                        error: 'No users were found in a DB!'
+                    })
+                }
+                res.status(SC.OK).json({
+                    message: 'User Fetched Successfully!',
+                    data: user
                 })
-            }
-            res.status(SC.OK).json({
-                message: 'User Fetched Successfully!',
-                data: user
             })
-        })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
@@ -100,17 +148,24 @@ const getAllEmployees = async (req, res) => {
 
 const getAllInsturctors = async (req, res) => {
     try {
-        await userModel.find({ role: 4 }).exec((err, user) => {
-            if (err || !user) {
-                return res.status(SC.NOT_FOUND).json({
-                    error: 'No users were found in a DB!'
+        await userModel
+            .find(
+                { role: 4 },
+                { salt: 0, encrypted_password: 0, profilePhoto: 0 }
+            )
+            .sort({ createdAt: -1 })
+
+            .exec((err, user) => {
+                if (err || !user) {
+                    return res.status(SC.NOT_FOUND).json({
+                        error: 'No users were found in a DB!'
+                    })
+                }
+                res.status(SC.OK).json({
+                    message: 'User Fetched Successfully!',
+                    data: user
                 })
-            }
-            res.status(SC.OK).json({
-                message: 'User Fetched Successfully!',
-                data: user
             })
-        })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
@@ -124,23 +179,36 @@ const getUserByQuery = async (req, res) => {
         if (!query?.createdAt) {
             if (query?.courses.length === 0) {
                 delete query.courses
-                await userModel.find(query).exec((err, user) => {
-                    if (err || !user) {
-                        return res.status(SC.NOT_FOUND).json({
-                            error: 'No users were found in a DB!'
-                        })
-                    }
-                    res.status(SC.OK).json({
-                        message: 'User Fetched Successfully!',
-                        length: user?.length,
-                        data: user
+                await userModel
+                    .find(query, {
+                        salt: 0,
+                        encrypted_password: 0,
+                        profilePhoto: 0
                     })
-                })
+                    .sort({ createdAt: -1 })
+
+                    .exec((err, user) => {
+                        if (err || !user) {
+                            return res.status(SC.NOT_FOUND).json({
+                                error: 'No users were found in a DB!'
+                            })
+                        }
+                        res.status(SC.OK).json({
+                            message: 'User Fetched Successfully!',
+                            length: user?.length,
+                            data: user
+                        })
+                    })
             } else {
                 let courses = req.body.query.courses
                 delete query.courses
                 await userModel
-                    .find({ $and: [query, { courses: { $in: courses } }] })
+                    .find(
+                        { $and: [query, { courses: { $in: courses } }] },
+                        { salt: 0, encrypted_password: 0, profilePhoto: 0 }
+                    )
+                    .sort({ createdAt: -1 })
+
                     .exec((err, user) => {
                         if (err || !user) {
                             return res.status(SC.NOT_FOUND).json({
@@ -162,21 +230,26 @@ const getUserByQuery = async (req, res) => {
             if (query.courses.length === 0) {
                 delete query.courses
                 await userModel
-                    .find({
-                        $and: [
-                            query,
-                            {
-                                createdAt: {
-                                    $gte: new Date(
-                                        new Date(createdAt).toDateString()
-                                    ).toISOString(),
-                                    $lt: new Date(
-                                        new Date(nextDate).toDateString()
-                                    ).toISOString()
+                    .find(
+                        {
+                            $and: [
+                                query,
+                                {
+                                    createdAt: {
+                                        $gte: new Date(
+                                            new Date(createdAt).toDateString()
+                                        ).toISOString(),
+                                        $lt: new Date(
+                                            new Date(nextDate).toDateString()
+                                        ).toISOString()
+                                    }
                                 }
-                            }
-                        ]
-                    })
+                            ]
+                        },
+                        { salt: 0, encrypted_password: 0, profilePhoto: 0 }
+                    )
+                    .sort({ createdAt: -1 })
+
                     .exec((err, user) => {
                         if (err || !user) {
                             return res.status(SC.NOT_FOUND).json({
@@ -193,22 +266,27 @@ const getUserByQuery = async (req, res) => {
                 let courses = req.body.query.courses
                 delete query.courses
                 await userModel
-                    .find({
-                        $and: [
-                            query,
-                            { courses: { $in: courses } },
-                            {
-                                createdAt: {
-                                    $gte: new Date(
-                                        new Date(createdAt).toDateString()
-                                    ).toISOString(),
-                                    $lt: new Date(
-                                        new Date(nextDate).toDateString()
-                                    ).toISOString()
+                    .find(
+                        {
+                            $and: [
+                                query,
+                                { courses: { $in: courses } },
+                                {
+                                    createdAt: {
+                                        $gte: new Date(
+                                            new Date(createdAt).toDateString()
+                                        ).toISOString(),
+                                        $lt: new Date(
+                                            new Date(nextDate).toDateString()
+                                        ).toISOString()
+                                    }
                                 }
-                            }
-                        ]
-                    })
+                            ]
+                        },
+                        { salt: 0, encrypted_password: 0, profilePhoto: 0 }
+                    )
+                    .sort({ createdAt: -1 })
+
                     .exec((err, user) => {
                         if (err || !user) {
                             return res.status(SC.NOT_FOUND).json({
@@ -270,5 +348,6 @@ module.exports = {
     getAllEmployees,
     getAllInsturctors,
     getUserByQuery,
-    blockunblock
+    blockunblock,
+    getUserPhoto
 }

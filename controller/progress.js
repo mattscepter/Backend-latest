@@ -10,9 +10,10 @@ const getAllProgress = async (req, res) => {
     try {
         await progressModel
             .find({})
-            .then(() => {
+            .then((data) => {
                 res.status(SC.OK).json({
-                    message: 'Fetched all progress successfully'
+                    message: 'Fetched all progress successfully',
+                    data
                 })
             })
             .catch((err) => {

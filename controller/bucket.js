@@ -264,21 +264,24 @@ const getBucketById = async (req, res) => {
 
 const getAllBuckets = async (req, res) => {
     try {
-        await bucketModel.find({}).exec((err, data) => {
-            if (err) {
-                logger(err, 'ERROR')
-            }
-            if (data) {
-                res.status(SC.OK).json({
-                    message: 'Buckets fetched successfully!',
-                    data: data
-                })
-            } else {
-                res.status(SC.NOT_FOUND).json({
-                    error: 'No Buckets found!'
-                })
-            }
-        })
+        await bucketModel
+            .find({})
+            .sort({ createdAt: -1 })
+            .exec((err, data) => {
+                if (err) {
+                    logger(err, 'ERROR')
+                }
+                if (data) {
+                    res.status(SC.OK).json({
+                        message: 'Buckets fetched successfully!',
+                        data: data
+                    })
+                } else {
+                    res.status(SC.NOT_FOUND).json({
+                        error: 'No Buckets found!'
+                    })
+                }
+            })
     } catch (err) {
         logger(err, 'ERROR')
     } finally {
